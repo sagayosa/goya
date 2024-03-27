@@ -1,11 +1,12 @@
 package goya
 
 type Option struct {
-	// Data can be map or struct
-	// Data will convert into the body
-	Data any
+	// Json can be used then you want to send JSON within the request body
+	// Json must be map[string]any or struct
+	// Json will convert into the body
+	Json any
 
-	// Params can be map or struct
+	// Params must be map[string]any or struct
 	// Params will convert into the URL as the query argument
 	Params any
 }

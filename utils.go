@@ -2,6 +2,7 @@ package goya
 
 import (
 	"reflect"
+	"strings"
 )
 
 func ConvertStructToMap(src any) map[string]any {
@@ -24,4 +25,12 @@ func ConvertStructToMap(src any) map[string]any {
 	}
 
 	return nil
+}
+
+func StringPlus(strs ...string) string {
+	var builder strings.Builder
+	for _, str := range strs {
+		builder.WriteString(str)
+	}
+	return builder.String()
 }

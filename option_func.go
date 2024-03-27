@@ -2,16 +2,16 @@ package goya
 
 type OptionFunc func(opt *Option)
 
-// WithData will add data to the request body
-// data can be a structure or a map
-func WithData(data any) OptionFunc {
+// WithJson will add data to the request body
+// data must be a structure or a map[string]any
+func WithJson(data any) OptionFunc {
 	return func(opt *Option) {
-		opt.Data = data
+		opt.Json = data
 	}
 }
 
 // WithParams will add params to the request URL
-// params can be a structure or a map
+// params must be a structure or a map[string]any
 func WithParams(params any) OptionFunc {
 	return func(opt *Option) {
 		opt.Params = params
