@@ -4,49 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
-	"reflect"
 	"testing"
 )
-
-const (
-	testURL = "http://httpbin.org/get"
-)
-
-type BasicGetResponse struct {
-	Args    any     `json:"args"`
-	Headers Headers `json:"headers"`
-	Origin  string  `json:"origin"`
-	URL     string  `json:"url"`
-}
-
-type Headers struct {
-	Accept         string `json:"Accept"`
-	AcceptEncoding string `json:"Accept-Encoding"`
-	AcceptLanguage string `json:"Accept-Language"`
-	Host           string `json:"Host"`
-	UserAgent      string `json:"User-Agent"`
-	ContentType    string `json:"Content-Type"`
-	ContentLength  string `json:"Content-Length"`
-}
-
-func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
-	if first.Headers.ContentType != second.Headers.ContentType {
-		return false
-	}
-	if first.Headers.ContentLength != second.Headers.ContentLength {
-		return false
-	}
-	parsedWant, _ := url.Parse(first.URL)
-	parsedGot, _ := url.Parse(second.URL)
-	if !reflect.DeepEqual(parsedWant.Query(), parsedGot.Query()) {
-		return false
-	}
-	firstArgs, _ := json.Marshal(first.Args)
-	secondArgs, _ := json.Marshal(second.Args)
-
-	return reflect.DeepEqual(firstArgs, secondArgs)
-}
 
 func TestDo(t *testing.T) {
 	ts := []struct {
