@@ -36,6 +36,9 @@ func (c *RequestClient) Do() *http.Response {
 	if c.Request == nil {
 		c.Build()
 	}
+	if c.Client == nil {
+		c.Client = &http.Client{}
+	}
 	resp, err := c.Client.Do(c.Request)
 	if err != nil {
 		c.errHappen(err)
