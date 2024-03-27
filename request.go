@@ -40,6 +40,8 @@ func (b *RequestBuider) Build() *http.Request {
 	return request
 }
 
+// Return all errors that occurred during the Build()
+// If no error occurs, return nil
 func (b *RequestBuider) Errors() []error {
 	if len(b.errs) == 0 {
 		return nil
