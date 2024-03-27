@@ -7,5 +7,5 @@ const (
 )
 
 const (
-	testURL = "http://httpbin.org/get"
+	testURL string = "http://httpbin.org/get"
 )

@@ -1,6 +1,7 @@
 package goya
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -19,6 +20,9 @@ type Response struct {
 // Bytes will read the body and return the result in []byte
 // and the RawResponse will be closed
 func (r *Response) Bytes() ([]byte, error) {
+	if r.RawResponse == nil {
+		return nil, fmt.Errorf("RawResponse is nil")
+	}
 	bts, err := io.ReadAll(r.RawResponse.Body)
 	if err != nil {
 		return bts, nil
@@ -41,6 +45,11 @@ func (r *Response) String() (string, error) {
 }
 
 func NewResponse(resp *http.Response) *Response {
+	if resp == nil {
+		return &Response{
+			RawResponse: resp,
+		}
+	}
 	return &Response{
 		StatusCode:  resp.StatusCode,
 		Header:      resp.Header,

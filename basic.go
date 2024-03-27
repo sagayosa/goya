@@ -1,6 +1,9 @@
 package goya
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 // RequestRaw returns the *http.Response after the request and no reads were made
 func RequestRaw(method, URL string, opt *Option) *Response {
@@ -19,28 +22,28 @@ func Request[T any](method, URL string, opt *Option) T {
 // The return value will be an instance of the type T you specified
 // Return value is a JSON deserialization of the response body of the request
 func GetOpts[T any](URL string, opt *Option) T {
-	return Request[T]("GET", URL, opt)
+	return Request[T](http.MethodGet, URL, opt)
 }
 
 // PostOpts send a post request to the URL with opt options,
 // The return value will be an instance of the type T you specified
 // Return value is a JSON deserialization of the response body of the request
 func PostOpts[T any](URL string, opt *Option) T {
-	return Request[T]("Post", URL, opt)
+	return Request[T](http.MethodPost, URL, opt)
 }
 
 // PutOpts send a put request to the URL with opt options,
 // The return value will be an instance of the type T you specified
 // Return value is a JSON deserialization of the response body of the request
 func PutOpts[T any](URL string, opt *Option) T {
-	return Request[T]("Put", URL, opt)
+	return Request[T](http.MethodPut, URL, opt)
 }
 
 // DeleteOpts send a delete request to the URL with opt options,
 // The return value will be an instance of the type T you specified
 // Return value is a JSON deserialization of the response body of the request
 func DeleteOpts[T any](URL string, opt *Option) T {
-	return Request[T]("Delete", URL, opt)
+	return Request[T](http.MethodDelete, URL, opt)
 }
 
 // Get send a get request to the URL with params

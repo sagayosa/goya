@@ -26,19 +26,29 @@ func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
 		Opt:    opt,
 
 		errs: make([]error, 0),
+		url:  url,
 	}
 }
 
 func (b *RequestBuider) Build() *http.Request {
-	if b.Opt.Json != nil {
-		b.buildJson()
+	if b.Opt != nil {
+		if b.Opt.Json != nil {
+			b.buildJson()
+		}
+		if b.Opt.Params != nil {
+			b.buildParams()
+		}
 	}
-	if b.Opt.Params != nil {
-		b.buildParams()
+
+	request, err := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
+	if err != nil {
+		b.errHappen(err)
 	}
-	request, _ := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
-	if len(b.Opt.Headers) != 0 {
-		b.buildHeaders(request)
+
+	if b.Opt != nil {
+		if len(b.Opt.Headers) != 0 {
+			b.buildHeaders(request)
+		}
 	}
 	return request
 }
