@@ -50,7 +50,7 @@ func (b *RequestBuider) buildParams() {
 	var mp map[string]any
 	tp := reflect.TypeOf(b.Opt.Params).Kind()
 	if tp == reflect.Struct {
-		mp = ConvertStructToMap(mp)
+		mp = ConvertStructToMap(b.Opt.Params)
 	} else if tp == reflect.Map {
 		var ok bool
 		mp, ok = b.Opt.Params.(map[string]any)
@@ -70,7 +70,7 @@ func (b *RequestBuider) buildParams() {
 	}
 	querys := parsedURL.Query()
 	for k, v := range mp {
-		querys.Add(k, fmt.Sprintln(v))
+		querys.Add(k, fmt.Sprintf("%v", v))
 	}
 
 	parsedURL.RawQuery = querys.Encode()

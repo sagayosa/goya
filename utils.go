@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// src must be struct
+// The index of the result will be the json in the tag of each field
 func ConvertStructToMap(src any) map[string]any {
 	if src == nil {
 		return nil
@@ -18,7 +20,7 @@ func ConvertStructToMap(src any) map[string]any {
 	}
 	if objVal.Kind() == reflect.Struct {
 		for i := 0; i < objVal.NumField(); i++ {
-			result[objVal.Type().Field(i).Name] = objVal.Field(i).Interface()
+			result[objVal.Type().Field(i).Tag.Get("json")] = objVal.Field(i).Interface()
 		}
 
 		return result
