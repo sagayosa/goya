@@ -15,22 +15,54 @@ func Request[T any](method, URL string, opt *Option) T {
 	return result
 }
 
-func Get[T any](URL string, opts ...OptionFunc) T {
-	opt := NewOption(opts...)
+// GetOpts send a get request to the URL with opt options,
+// The return value will be an instance of the type T you specified
+// Return value is a JSON deserialization of the response body of the request
+func GetOpts[T any](URL string, opt *Option) T {
 	return Request[T]("GET", URL, opt)
 }
 
-func Post[T any](URL string, opts ...OptionFunc) T {
-	opt := NewOption(opts...)
+// PostOpts send a post request to the URL with opt options,
+// The return value will be an instance of the type T you specified
+// Return value is a JSON deserialization of the response body of the request
+func PostOpts[T any](URL string, opt *Option) T {
 	return Request[T]("Post", URL, opt)
 }
 
-func Put[T any](URL string, opts ...OptionFunc) T {
-	opt := NewOption(opts...)
+// PutOpts send a put request to the URL with opt options,
+// The return value will be an instance of the type T you specified
+// Return value is a JSON deserialization of the response body of the request
+func PutOpts[T any](URL string, opt *Option) T {
 	return Request[T]("Put", URL, opt)
 }
 
-func Delete[T any](URL string, opts ...OptionFunc) T {
-	opt := NewOption(opts...)
+// DeleteOpts send a delete request to the URL with opt options,
+// The return value will be an instance of the type T you specified
+// Return value is a JSON deserialization of the response body of the request
+func DeleteOpts[T any](URL string, opt *Option) T {
 	return Request[T]("Delete", URL, opt)
+}
+
+// Get send a get request to the URL with params
+// params must be struct or map[string]any
+func Get[T any](URL string, params any) T {
+	return GetOpts[T](URL, NewOption(WithParams(params)))
+}
+
+// Post send a post request to the URL with body in json
+// body must be struct or map[string]any
+func Post[T any](URL string, body any) T {
+	return PostOpts[T](URL, NewOption(WithJson(body)))
+}
+
+// Put send a put request to the URL with body in json
+// body must be struct or map[string]any
+func Put[T any](URL string, body any) T {
+	return PutOpts[T](URL, NewOption(WithJson(body)))
+}
+
+// Delete send a delete request to the URL with body in json
+// body must be struct or map[string]any
+func Delete[T any](URL string, body any) T {
+	return DeleteOpts[T](URL, NewOption(WithJson(body)))
 }
