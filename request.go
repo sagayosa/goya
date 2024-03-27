@@ -24,6 +24,8 @@ func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
 		Method: method,
 		URL:    url,
 		Opt:    opt,
+
+		errs: make([]error, 0),
 	}
 }
 
@@ -36,6 +38,13 @@ func (b *RequestBuider) Build() *http.Request {
 	}
 	request, _ := http.NewRequest(b.Method, b.URL, bytes.NewBuffer(b.body))
 	return request
+}
+
+func (b *RequestBuider) Errors() []error {
+	if len(b.errs) == 0 {
+		return nil
+	}
+	return b.errs
 }
 
 func (b *RequestBuider) errHappen(err error) {
