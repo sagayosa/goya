@@ -1,6 +1,7 @@
 package goya
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -30,7 +31,10 @@ func (b *RequestBuider) Build() *http.Request {
 	if b.Opt.Json != nil {
 		b.buildJson()
 	}
-	request, _ := http.NewRequest(b.Method, b.URL, nil)
+	if b.Opt.Params != nil {
+		b.buildParams()
+	}
+	request, _ := http.NewRequest(b.Method, b.URL, bytes.NewBuffer(b.body))
 	return request
 }
 
