@@ -75,16 +75,20 @@ func (b *RequestBuider) buildJson() {
 }
 
 func (b *RequestBuider) buildParams() {
-	var mp map[string]any
+	mp := map[string]any{}
 	tp := reflect.TypeOf(b.Opt.Params).Kind()
 	if tp == reflect.Struct {
 		mp = ConvertStructToMap(b.Opt.Params)
 	} else if tp == reflect.Map {
-		var ok bool
-		mp, ok = b.Opt.Params.(map[string]any)
-		if !ok {
-			b.errHappen(fmt.Errorf("params is map but not the map[string]any"))
-			return
+		// var ok bool
+		// mp, ok = b.Opt.Params.(map[string]any)
+		// if !ok {
+		// 	b.errHappen(fmt.Errorf("params is map but not the map[string]any"))
+		// 	return
+		// }
+		rv := reflect.ValueOf(b.Opt.Params)
+		for _, k := range rv.MapKeys() {
+			mp[fmt.Sprintf("%v", k)] = rv.MapIndex(k)
 		}
 	} else {
 		b.errHappen(fmt.Errorf("params is neither struct nor map[string]any"))
