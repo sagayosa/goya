@@ -9,3 +9,11 @@ type Option struct {
 	// Params will convert into the URL as the query argument
 	Params any
 }
+
+func NewOption(opts ...OptionFunc) *Option {
+	opt := &Option{}
+	for _, f := range opts {
+		f(opt)
+	}
+	return opt
+}
