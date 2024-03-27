@@ -18,6 +18,14 @@ type RequestBuider struct {
 	buildBody []byte
 }
 
+func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
+	return &RequestBuider{
+		Method: method,
+		URL:    url,
+		Opt:    opt,
+	}
+}
+
 func (b *RequestBuider) Build() *http.Request {
 	if b.Opt.Json != nil {
 		b.buildJson()
