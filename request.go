@@ -13,9 +13,9 @@ type RequestBuider struct {
 	URL    string
 	Opt    *Option
 
-	buildErr  []error
-	buildURL  string
-	buildBody []byte
+	errs []error
+	url  string
+	body []byte
 }
 
 func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
@@ -35,7 +35,7 @@ func (b *RequestBuider) Build() *http.Request {
 }
 
 func (b *RequestBuider) errHappen(err error) {
-	b.buildErr = append(b.buildErr, err)
+	b.errs = append(b.errs, err)
 }
 
 func (b *RequestBuider) buildJson() {
@@ -43,7 +43,7 @@ func (b *RequestBuider) buildJson() {
 	if err != nil {
 		b.errHappen(err)
 	}
-	b.buildBody = bts
+	b.body = bts
 }
 
 func (b *RequestBuider) buildParams() {
@@ -74,5 +74,5 @@ func (b *RequestBuider) buildParams() {
 	}
 
 	parsedURL.RawQuery = querys.Encode()
-	b.buildURL = parsedURL.String()
+	b.url = parsedURL.String()
 }

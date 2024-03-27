@@ -43,8 +43,8 @@ func TestBuildJson(t *testing.T) {
 
 		want, _ := json.Marshal(tt.data)
 
-		if !reflect.DeepEqual(b.buildBody, want) {
-			t.Errorf("buildJson got %v but want %v", b.buildBody, want)
+		if !reflect.DeepEqual(b.body, want) {
+			t.Errorf("buildJson got %v but want %v", b.body, want)
 		}
 	}
 }
@@ -101,10 +101,10 @@ func TestBuildParams(t *testing.T) {
 		b.buildParams()
 
 		parsedWant, _ := url.Parse(tt.want)
-		parsedGot, _ := url.Parse(b.buildURL)
+		parsedGot, _ := url.Parse(b.url)
 
 		if !reflect.DeepEqual(parsedGot.Query(), parsedWant.Query()) {
-			t.Errorf("buildParams got %v but want %v", b.buildURL, tt.want)
+			t.Errorf("buildParams got %v but want %v", b.url, tt.want)
 		}
 	}
 }
