@@ -1,6 +1,8 @@
 package goya
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type RequestClient struct {
 	Method  string
@@ -27,7 +29,11 @@ func NewRequestClient(method, url string, opt *Option, client *http.Client) *Req
 // Build will build the request according to the Option and return the built http request
 // Your modifications to the return value will be reflected in the client
 func (c *RequestClient) Build() *http.Request {
-	request := NewRequestBuilder(c.Method, c.URL, c.Opt).Build()
+	builder := NewRequestBuilder(c.Method, c.URL, c.Opt)
+	request := builder.Build()
+	if builder.Errors() != nil {
+		c.errs = append(c.errs, builder.Errors()...)
+	}
 	c.Request = request
 	return c.Request
 }

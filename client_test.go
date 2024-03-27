@@ -1,19 +1,62 @@
 package goya
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
+	"net/url"
+	"reflect"
 	"testing"
 )
 
 const (
-	testURL = "http://httpbin.org"
+	testURL = "http://httpbin.org/get"
 )
+
+type BasicGetResponse struct {
+	Args    any     `json:"args"`
+	Headers Headers `json:"headers"`
+	Origin  string  `json:"origin"`
+	URL     string  `json:"url"`
+}
+
+type Headers struct {
+	Accept         string `json:"Accept"`
+	AcceptEncoding string `json:"Accept-Encoding"`
+	AcceptLanguage string `json:"Accept-Language"`
+	Host           string `json:"Host"`
+	UserAgent      string `json:"User-Agent"`
+	ContentType    string `json:"Content-Type"`
+	ContentLength  string `json:"Content-Length"`
+}
+
+func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
+	// if first.Headers.ContentType != second.Headers.ContentType {
+	// 	return false
+	// }
+	if first.Headers.ContentLength != second.Headers.ContentLength {
+		return false
+	}
+	parsedWant, _ := url.Parse(first.URL)
+	parsedGot, _ := url.Parse(second.URL)
+	if !reflect.DeepEqual(parsedWant.Query(), parsedGot.Query()) {
+		return false
+	}
+	firstArgs, _ := json.Marshal(first.Args)
+	secondArgs, _ := json.Marshal(second.Args)
+	if !reflect.DeepEqual(firstArgs, secondArgs) {
+		return false
+	}
+
+	return true
+}
 
 func TestDo(t *testing.T) {
 	ts := []struct {
 		url    string
 		params any
 		data   any
+		want   *BasicGetResponse
 	}{
 		{
 			testURL,
@@ -22,6 +65,17 @@ func TestDo(t *testing.T) {
 				"db":   "test",
 			},
 			nil,
+			&BasicGetResponse{
+				Args: map[string]any{
+					"host": "127.0.0.1",
+					"db":   "test",
+				},
+				URL: "http://httpbin.org/get?host=127.0.0.1&db=test",
+				Headers: Headers{
+					ContentType:   "",
+					ContentLength: "",
+				},
+			},
 		},
 		{
 			testURL,
@@ -40,6 +94,18 @@ func TestDo(t *testing.T) {
 				"where":  "id = ?",
 				"?":      3,
 			},
+			&BasicGetResponse{
+				Args: map[string]any{
+					"host":    "127.0.0.1",
+					"db":      "test2",
+					"version": "2",
+				},
+				URL: "http://httpbin.org/get?host=127.0.0.1&db=test2&version=2",
+				Headers: Headers{
+					ContentType:   "application/json",
+					ContentLength: "49",
+				},
+			},
 		},
 	}
 
@@ -47,6 +113,13 @@ func TestDo(t *testing.T) {
 		resp := NewRequestClient("GET", tt.url, NewOption(WithJson(tt.data), WithParams(tt.params)), nil).Do()
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Do got StatusCode %v but want %v", resp.StatusCode, http.StatusOK)
+		}
+		body, _ := io.ReadAll(resp.Body)
+		basic := &BasicGetResponse{}
+		json.Unmarshal(body, basic)
+
+		if !compareResp(basic, tt.want) {
+			t.Errorf("Do got body %v but want %v", basic, tt.want)
 		}
 	}
 }

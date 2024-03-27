@@ -36,7 +36,8 @@ func (b *RequestBuider) Build() *http.Request {
 	if b.Opt.Params != nil {
 		b.buildParams()
 	}
-	request, _ := http.NewRequest(b.Method, b.URL, bytes.NewBuffer(b.body))
+	request, _ := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
+	request.Header.Set("Content-Type", "application/json")
 	return request
 }
 
