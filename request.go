@@ -37,7 +37,9 @@ func (b *RequestBuider) Build() *http.Request {
 		b.buildParams()
 	}
 	request, _ := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
-	request.Header.Set("Content-Type", "application/json")
+	if len(b.Opt.Headers) != 0 {
+		b.buildHeaders(request)
+	}
 	return request
 }
 
@@ -91,4 +93,10 @@ func (b *RequestBuider) buildParams() {
 
 	parsedURL.RawQuery = querys.Encode()
 	b.url = parsedURL.String()
+}
+
+func (b *RequestBuider) buildHeaders(req *http.Request) {
+	for k, v := range b.Opt.Headers {
+		req.Header.Set(k, v)
+	}
 }

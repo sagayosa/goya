@@ -9,10 +9,14 @@ type Option struct {
 	// Params must be map[string]any or struct
 	// Params will convert into the URL as the query argument
 	Params any
+
+	Headers map[string]string
 }
 
 func NewOption(opts ...OptionFunc) *Option {
-	opt := &Option{}
+	opt := &Option{
+		Headers: map[string]string{},
+	}
 	for _, f := range opts {
 		f(opt)
 	}

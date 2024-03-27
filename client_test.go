@@ -31,9 +31,9 @@ type Headers struct {
 }
 
 func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
-	// if first.Headers.ContentType != second.Headers.ContentType {
-	// 	return false
-	// }
+	if first.Headers.ContentType != second.Headers.ContentType {
+		return false
+	}
 	if first.Headers.ContentLength != second.Headers.ContentLength {
 		return false
 	}
@@ -44,11 +44,8 @@ func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
 	}
 	firstArgs, _ := json.Marshal(first.Args)
 	secondArgs, _ := json.Marshal(second.Args)
-	if !reflect.DeepEqual(firstArgs, secondArgs) {
-		return false
-	}
 
-	return true
+	return reflect.DeepEqual(firstArgs, secondArgs)
 }
 
 func TestDo(t *testing.T) {
