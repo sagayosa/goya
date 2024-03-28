@@ -50,6 +50,16 @@ type BasicGetResponse struct {
 	URL     string  `json:"url"`
 }
 
+type BasicPostResponse struct {
+	Headers Headers `json:"headers"`
+	Origin  string  `json:"origin"`
+	URL     string  `json:"url"`
+	Args    any     `json:"args"`
+	Data    string  `json:"data"`
+	Files   any     `json:"files"`
+	Form    any     `json:"form"`
+}
+
 type Headers struct {
 	Accept         string `json:"Accept"`
 	AcceptEncoding string `json:"Accept-Encoding"`

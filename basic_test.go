@@ -11,7 +11,7 @@ var ts = []struct {
 	want   *BasicGetResponse
 }{
 	{
-		testURL,
+		getURL,
 		map[string]any{
 			"host": "127.0.0.1",
 			"db":   "test",
@@ -30,7 +30,7 @@ var ts = []struct {
 		},
 	},
 	{
-		testURL,
+		getURL,
 		struct {
 			Host    string `json:"host"`
 			Db      string `json:"db"`
