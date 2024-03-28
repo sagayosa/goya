@@ -22,9 +22,9 @@ func TestBuildJson(t *testing.T) {
 		{
 			"http://127.0.0.1:3306",
 			struct {
-				host    string
-				db      string
-				version int
+				Host    string `json:"host"`
+				Db      string `json:"db"`
+				Version int    `json:"version"`
 			}{
 				"127.0.0.1",
 				"test2",
@@ -105,6 +105,53 @@ func TestBuildParams(t *testing.T) {
 
 		if !reflect.DeepEqual(parsedGot.Query(), parsedWant.Query()) {
 			t.Errorf("buildParams got %v but want %v", b.url, tt.want)
+		}
+	}
+}
+
+func TestBuildFormData(t *testing.T) {
+	ts := []struct {
+		url  string
+		data any
+	}{
+		{
+			"http://127.0.0.1:3306",
+			map[string]any{
+				"host": "127.0.0.1",
+				"db":   "test",
+				"form": []string{"1", "2", "goya!!!!!"},
+			},
+		},
+		{
+			"http://127.0.0.1:3306",
+			struct {
+				Host    string `json:"host"`
+				Db      string `json:"db"`
+				Version string `json:"version"`
+			}{
+				"127.0.0.1",
+				"test2",
+				"2",
+			},
+		},
+	}
+
+	for _, tt := range ts {
+		b := NewRequestBuilder("POST", tt.url, NewOption(WithForm(tt.data)))
+		// b.buildFormData()
+		r := b.Build()
+		if err := r.ParseMultipartForm(20 << 32); err != nil {
+			t.Error(err)
+		}
+
+		want, err := ConvertToMapStringAny(tt.data)
+		if err != nil {
+			t.Error(err)
+		}
+		form := ConvertFormToNormalOne(r.Form)
+
+		if !reflect.DeepEqual(form, want) {
+			t.Errorf("buildJson got %v but want %v", form, want)
 		}
 	}
 }

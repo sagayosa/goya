@@ -24,7 +24,7 @@ func ConvertToMapStringAny(src any) (map[string]any, error) {
 		// }
 		rv := reflect.ValueOf(src)
 		for _, k := range rv.MapKeys() {
-			result[fmt.Sprintf("%v", k)] = rv.MapIndex(k)
+			result[fmt.Sprintf("%v", k)] = rv.MapIndex(k).Interface()
 		}
 	} else {
 		return nil, fmt.Errorf("params is neither struct nor map[string]any")
@@ -59,6 +59,21 @@ func ConvertStructToMap(src any) map[string]any {
 	}
 
 	return nil
+}
+
+// src must be in the form of http.Request
+// ConvertFormToNormalOne will convert the form to a map[string]any
+// If []string only has one element, it will be converted to a string.
+func ConvertFormToNormalOne(src map[string][]string) map[string]any {
+	result := map[string]any{}
+	for k, v := range src {
+		if len(v) == 1 {
+			result[k] = v[0]
+		} else {
+			result[k] = v
+		}
+	}
+	return result
 }
 
 func StringPlus(strs ...string) string {

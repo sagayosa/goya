@@ -23,6 +23,5 @@ func WithParams(params any) OptionFunc {
 func WithForm(data any) OptionFunc {
 	return func(opt *Option) {
 		opt.FormData = data
-
 	}
 }

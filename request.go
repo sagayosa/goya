@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 type RequestBuider struct {
@@ -35,7 +36,6 @@ func (b *RequestBuider) Build() *http.Request {
 		b.buildBody()
 		b.buildURL()
 	}
-
 	request, err := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
 	if err != nil {
 		b.errHappen(err)
@@ -98,9 +98,20 @@ func (b *RequestBuider) buildFormData() {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	for k, v := range mp {
-		err := writer.WriteField(k, fmt.Sprintf("%v", v))
-		if err != nil {
-			b.errHappen(err)
+		val := reflect.ValueOf(v)
+		if val.Kind() == reflect.Slice {
+			for i := 0; i < val.Len(); i++ {
+				element := val.Index(i)
+				err := writer.WriteField(k, fmt.Sprintf("%v", element))
+				if err != nil {
+					b.errHappen(err)
+				}
+			}
+		} else {
+			err := writer.WriteField(k, fmt.Sprintf("%v", v))
+			if err != nil {
+				b.errHappen(err)
+			}
 		}
 	}
 	writer.Close()
