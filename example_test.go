@@ -70,3 +70,17 @@ func TestPost(t *testing.T) {
 		t.Errorf("resp.Data got %v but want %v", data, req)
 	}
 }
+
+func TestPostOpts(t *testing.T) {
+	req := TestStruct{"Hello", 3306}
+	// PostOpts can support more features
+	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	if resp.URL != StringPlus(postURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, StringPlus(postURL, "?temp=2"))
+	}
+	data := &TestStruct{}
+	json.Unmarshal([]byte(resp.Data), data)
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
