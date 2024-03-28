@@ -13,7 +13,7 @@ func WithJson(data any) OptionFunc {
 }
 
 // WithParams will add params to the request URL
-// params must be a structure or a map[string]any
+// params must be a structure or a map
 func WithParams(params any) OptionFunc {
 	return func(opt *Option) {
 		opt.Params = params
