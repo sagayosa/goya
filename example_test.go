@@ -164,3 +164,32 @@ func TestDeleteOpts(t *testing.T) {
 		t.Errorf("resp.Data got %v but want %v", data, req)
 	}
 }
+
+type FormStruct struct {
+	Name    string   `json:"name"`
+	Version string   `json:"version"`
+	Numbers []string `json:"numbers"`
+}
+
+func TestFormData(t *testing.T) {
+	// The Form only support string and []string
+	req := FormStruct{"Hello", "3306", []string{"1", "2", "3"}}
+	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req)))
+	data := &FormStruct{}
+	bts, _ := json.Marshal(resp.Form)
+	json.Unmarshal(bts, data)
+
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Form got %v but want %v", data, req)
+	}
+
+	req2 := map[string]any{"name": "Hello", "numbers": []any{"1", "2", "3"}}
+	resp2 := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req2)))
+	data2 := map[string]any{}
+	bts, _ = json.Marshal(resp2.Form)
+	json.Unmarshal(bts, &data2)
+
+	if !reflect.DeepEqual(data2, req2) {
+		t.Errorf("resp.Form got %v but want %v", data2, req2)
+	}
+}
