@@ -116,7 +116,47 @@ func TestPutOpts(t *testing.T) {
 	// PutOpts can support more features
 	resp := PutOpts[BasicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != StringPlus(putURL, "?temp=2") {
-		t.Errorf("resp.URL got %v but want %v", resp.URL, StringPlus(postURL, "?temp=2"))
+		t.Errorf("resp.URL got %v but want %v", resp.URL, StringPlus(putURL, "?temp=2"))
+	}
+	data := &TestStruct{}
+	json.Unmarshal([]byte(resp.Data), data)
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
+
+func TestDel(t *testing.T) {
+	// Pass the map as Json
+	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
+	resp := Delete[*BasicPostResponse](delURL, map[string]string{"temp": "2"})
+	// The response will be the zero value of the type you specified if some errors occur
+	if resp == nil {
+		t.Fatal("Del got nil")
+	}
+	mp := map[string]string{}
+	json.Unmarshal([]byte(resp.Data), &mp)
+	if !reflect.DeepEqual(mp, map[string]string{"temp": "2"}) {
+		t.Errorf("resp.Data got %v but want %v", mp, map[string]string{"temp": "2"})
+	}
+
+	req := TestStruct{"Hello", 3306}
+	// Pass the struct as Json
+	// The struct can also be a pointer.
+	resp2 := Delete[BasicPostResponse](delURL, req)
+	data := &TestStruct{}
+	json.Unmarshal([]byte(resp2.Data), data)
+
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
+
+func TestDeleteOpts(t *testing.T) {
+	req := TestStruct{"Hello", 3306}
+	// DeleteOpts can support more features
+	resp := DeleteOpts[BasicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	if resp.URL != StringPlus(delURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, StringPlus(delURL, "?temp=2"))
 	}
 	data := &TestStruct{}
 	json.Unmarshal([]byte(resp.Data), data)
