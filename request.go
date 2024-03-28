@@ -32,12 +32,8 @@ func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
 
 func (b *RequestBuider) Build() *http.Request {
 	if b.Opt != nil {
-		if b.Opt.Json != nil {
-			b.buildJson()
-		}
-		if b.Opt.Params != nil {
-			b.buildParams()
-		}
+		b.buildBody()
+		b.buildURL()
 	}
 
 	request, err := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
@@ -46,9 +42,7 @@ func (b *RequestBuider) Build() *http.Request {
 	}
 
 	if b.Opt != nil {
-		if len(b.Opt.Headers) != 0 {
-			b.buildHeaders(request)
-		}
+		b.buildHeaders(request)
 	}
 	return request
 }
@@ -64,6 +58,24 @@ func (b *RequestBuider) Errors() []error {
 
 func (b *RequestBuider) errHappen(err error) {
 	b.errs = append(b.errs, err)
+}
+
+func (b *RequestBuider) buildHeaders(req *http.Request) {
+	for k, v := range b.Opt.Headers {
+		req.Header.Set(k, v)
+	}
+}
+
+func (b *RequestBuider) buildBody() {
+	if b.Opt.Json != nil {
+		b.buildJson()
+	}
+}
+
+func (b *RequestBuider) buildURL() {
+	if b.Opt.Params != nil {
+		b.buildParams()
+	}
 }
 
 func (b *RequestBuider) buildJson() {
@@ -107,10 +119,4 @@ func (b *RequestBuider) buildParams() {
 
 	parsedURL.RawQuery = querys.Encode()
 	b.url = parsedURL.String()
-}
-
-func (b *RequestBuider) buildHeaders(req *http.Request) {
-	for k, v := range b.Opt.Headers {
-		req.Header.Set(k, v)
-	}
 }
