@@ -97,6 +97,8 @@ func (b *RequestBuider) buildFormData() {
 	}
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
+	// The form data must be of type map[string]string or map[string][]string.
+	// Therefore, I distinguish between the slice and other types, and use fmt.Sprintf directly.
 	for k, v := range mp {
 		val := reflect.ValueOf(v)
 		if val.Kind() == reflect.Slice {
@@ -132,6 +134,8 @@ func (b *RequestBuider) buildParams() {
 		return
 	}
 	querys := parsedURL.Query()
+	// The params must be string
+	// Therefore, i use fmt.Sprintf directly
 	for k, v := range mp {
 		querys.Add(k, fmt.Sprintf("%v", v))
 	}
