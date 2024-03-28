@@ -7,9 +7,6 @@ type OptionFunc func(opt *Option)
 func WithJson(data any) OptionFunc {
 	return func(opt *Option) {
 		opt.Json = data
-		if data != nil {
-			opt.Headers[ContentType] = ContentTypeJSON
-		}
 	}
 }
 
@@ -26,5 +23,6 @@ func WithParams(params any) OptionFunc {
 func WithForm(data any) OptionFunc {
 	return func(opt *Option) {
 		opt.FormData = data
+
 	}
 }

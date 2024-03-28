@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 )
@@ -68,6 +69,8 @@ func (b *RequestBuider) buildHeaders(req *http.Request) {
 func (b *RequestBuider) buildBody() {
 	if b.Opt.Json != nil {
 		b.buildJson()
+	} else if b.Opt.FormData != nil {
+		b.buildFormData()
 	}
 }
 
@@ -83,10 +86,27 @@ func (b *RequestBuider) buildJson() {
 		b.errHappen(err)
 	}
 	b.body = bts
+
+	b.Opt.Headers[ContentType] = ContentTypeJSON
 }
 
 func (b *RequestBuider) buildFormData() {
+	mp, err := ConvertToMapStringAny(b.Opt.FormData)
+	if err != nil {
+		b.errHappen(err)
+	}
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	for k, v := range mp {
+		err := writer.WriteField(k, fmt.Sprintf("%v", v))
+		if err != nil {
+			b.errHappen(err)
+		}
+	}
+	writer.Close()
+	b.body = body.Bytes()
 
+	b.Opt.Headers[ContentType] = writer.FormDataContentType()
 }
 
 func (b *RequestBuider) buildParams() {
