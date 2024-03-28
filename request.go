@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"reflect"
 )
 
 type RequestBuider struct {
@@ -86,25 +85,14 @@ func (b *RequestBuider) buildJson() {
 	b.body = bts
 }
 
+func (b *RequestBuider) buildFormData() {
+
+}
+
 func (b *RequestBuider) buildParams() {
-	mp := map[string]any{}
-	tp := reflect.TypeOf(b.Opt.Params).Kind()
-	if tp == reflect.Struct || tp == reflect.Pointer {
-		mp = ConvertStructToMap(b.Opt.Params)
-	} else if tp == reflect.Map {
-		// var ok bool
-		// mp, ok = b.Opt.Params.(map[string]any)
-		// if !ok {
-		// 	b.errHappen(fmt.Errorf("params is map but not the map[string]any"))
-		// 	return
-		// }
-		rv := reflect.ValueOf(b.Opt.Params)
-		for _, k := range rv.MapKeys() {
-			mp[fmt.Sprintf("%v", k)] = rv.MapIndex(k)
-		}
-	} else {
-		b.errHappen(fmt.Errorf("params is neither struct nor map[string]any"))
-		return
+	mp, err := ConvertToMapStringAny(b.Opt.Params)
+	if err != nil {
+		b.errHappen(err)
 	}
 
 	parsedURL, err := url.Parse(b.URL)

@@ -2,10 +2,36 @@ package goya
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
 )
+
+// ConvertToMapStringAny is mainly used to convert the struct and map into map[string]any
+// If src is neither a struct nor a map, it will return an error : params is neither struct nor map[string]any
+func ConvertToMapStringAny(src any) (map[string]any, error) {
+	result := map[string]any{}
+	tp := reflect.TypeOf(src).Kind()
+	if tp == reflect.Struct || tp == reflect.Pointer {
+		result = ConvertStructToMap(src)
+	} else if tp == reflect.Map {
+		// var ok bool
+		// mp, ok = b.Opt.Params.(map[string]any)
+		// if !ok {
+		// 	b.errHappen(fmt.Errorf("params is map but not the map[string]any"))
+		// 	return
+		// }
+		rv := reflect.ValueOf(src)
+		for _, k := range rv.MapKeys() {
+			result[fmt.Sprintf("%v", k)] = rv.MapIndex(k)
+		}
+	} else {
+		return nil, fmt.Errorf("params is neither struct nor map[string]any")
+	}
+
+	return result, nil
+}
 
 // src must be struct
 // The index of the result will be the json in the tag of each field if the tag is exist
