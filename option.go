@@ -10,6 +10,10 @@ type Option struct {
 	// Params will convert into the URL as the query argument
 	Params any
 
+	// FormData must be map or struct
+	// FormData will convert into the body
+	FormData any
+
 	Headers map[string]string
 }
 
