@@ -77,7 +77,7 @@ func (b *RequestBuider) buildJson() {
 func (b *RequestBuider) buildParams() {
 	mp := map[string]any{}
 	tp := reflect.TypeOf(b.Opt.Params).Kind()
-	if tp == reflect.Struct {
+	if tp == reflect.Struct || tp == reflect.Pointer {
 		mp = ConvertStructToMap(b.Opt.Params)
 	} else if tp == reflect.Map {
 		// var ok bool

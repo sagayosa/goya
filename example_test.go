@@ -21,4 +21,9 @@ func TestGet(t *testing.T) {
 	if resp2.URL != StringPlus(testURL, "?name=Hello&id=3306") && resp2.URL != StringPlus(testURL, "?id=3306&name=Hello") {
 		t.Errorf("resp.URL got %v but want %v", resp2.URL, StringPlus(testURL, "?name=Hello&id=3306"))
 	}
+
+	resp3 := Get[BasicGetResponse](testURL, &req)
+	if resp3.URL != StringPlus(testURL, "?name=Hello&id=3306") && resp3.URL != StringPlus(testURL, "?id=3306&name=Hello") {
+		t.Errorf("resp.URL got %v but want %v", resp3.URL, StringPlus(testURL, "?name=Hello&id=3306"))
+	}
 }
