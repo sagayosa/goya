@@ -2,6 +2,7 @@ package goya
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 	"testing"
 )
@@ -203,5 +204,14 @@ func TestForceHeaders(t *testing.T) {
 	}
 	if resp.Headers.TestHeader != "1,2,3" {
 		t.Errorf("Content-Type got %v but want %v", resp.Headers.TestHeader, "1,2,3")
+	}
+}
+
+func TestCookies(t *testing.T) {
+	cookies := []*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}, {Name: "Test", Value: "12345"}}
+	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithCookies(cookies)))
+
+	if resp.Headers.Cookie != "Test=123; Test2=321; Test=12345" {
+		t.Errorf("Cookies got %v but want %v", resp.Headers.Cookie, "Test=123; Test2=321; Test=12345")
 	}
 }

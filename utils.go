@@ -110,6 +110,7 @@ type Headers struct {
 	ContentType    string `json:"Content-Type"`
 	ContentLength  string `json:"Content-Length"`
 	TestHeader     any    `json:"Test-Header"`
+	Cookie         string `json:"Cookie"`
 }
 
 func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
