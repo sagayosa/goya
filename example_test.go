@@ -16,7 +16,7 @@ type testStruct struct {
 func TestGet(t *testing.T) {
 	// Pass the map as params
 	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
-	resp := Get[*basicGetResponse](getURL, map[string]string{"temp": "2"})
+	resp := Get[*BasicGetResponse](getURL, map[string]string{"temp": "2"})
 	// The response will be the zero value of the type you specified if some errors occur
 	if resp == nil {
 		t.Fatal("Get got nil")
@@ -27,13 +27,13 @@ func TestGet(t *testing.T) {
 
 	req := testStruct{"Hello", 3306}
 	// Pass the struct as params
-	resp2 := Get[basicGetResponse](getURL, req)
+	resp2 := Get[BasicGetResponse](getURL, req)
 	// The order of the queries will be random
 	if resp2.URL != stringPlus(getURL, "?name=Hello&id=3306") && resp2.URL != stringPlus(getURL, "?id=3306&name=Hello") {
 		t.Errorf("resp.URL got %v but want %v", resp2.URL, stringPlus(getURL, "?name=Hello&id=3306"))
 	}
 	// You can also pass the pointer of the struct
-	resp3 := Get[basicGetResponse](getURL, &req)
+	resp3 := Get[BasicGetResponse](getURL, &req)
 	if resp3.URL != stringPlus(getURL, "?name=Hello&id=3306") && resp3.URL != stringPlus(getURL, "?id=3306&name=Hello") {
 		t.Errorf("resp.URL got %v but want %v", resp3.URL, stringPlus(getURL, "?name=Hello&id=3306"))
 	}
@@ -41,7 +41,7 @@ func TestGet(t *testing.T) {
 
 func TestGetOpts(t *testing.T) {
 	// GetOpts can support more features
-	resp := GetOpts[basicGetResponse](getURL, NewOption(WithParams(map[string]string{"temp": "2"})))
+	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithParams(map[string]string{"temp": "2"})))
 	if resp.URL != stringPlus(getURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(getURL, "?temp=2"))
 	}
@@ -50,7 +50,7 @@ func TestGetOpts(t *testing.T) {
 func TestPost(t *testing.T) {
 	// Pass the map as Json
 	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
-	resp := Post[*basicPostResponse](postURL, map[string]string{"temp": "2"})
+	resp := Post[*BasicPostResponse](postURL, map[string]string{"temp": "2"})
 	// The response will be the zero value of the type you specified if some errors occur
 	if resp == nil {
 		t.Fatal("Post got nil")
@@ -64,7 +64,7 @@ func TestPost(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// Pass the struct as Json
 	// The struct can also be a pointer.
-	resp2 := Post[basicPostResponse](postURL, req)
+	resp2 := Post[BasicPostResponse](postURL, req)
 	data := &testStruct{}
 	json.Unmarshal([]byte(resp2.Data), data)
 
@@ -76,7 +76,7 @@ func TestPost(t *testing.T) {
 func TestPostOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// PostOpts can support more features
-	resp := PostOpts[basicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(postURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(postURL, "?temp=2"))
 	}
@@ -90,7 +90,7 @@ func TestPostOpts(t *testing.T) {
 func TestPut(t *testing.T) {
 	// Pass the map as Json
 	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
-	resp := Put[*basicPostResponse](putURL, map[string]string{"temp": "2"})
+	resp := Put[*BasicPostResponse](putURL, map[string]string{"temp": "2"})
 	// The response will be the zero value of the type you specified if some errors occur
 	if resp == nil {
 		t.Fatal("Put got nil")
@@ -104,7 +104,7 @@ func TestPut(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// Pass the struct as Json
 	// The struct can also be a pointer.
-	resp2 := Put[basicPostResponse](putURL, req)
+	resp2 := Put[BasicPostResponse](putURL, req)
 	data := &testStruct{}
 	json.Unmarshal([]byte(resp2.Data), data)
 
@@ -116,7 +116,7 @@ func TestPut(t *testing.T) {
 func TestPutOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// PutOpts can support more features
-	resp := PutOpts[basicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := PutOpts[BasicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(putURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(putURL, "?temp=2"))
 	}
@@ -130,7 +130,7 @@ func TestPutOpts(t *testing.T) {
 func TestDel(t *testing.T) {
 	// Pass the map as Json
 	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
-	resp := Delete[*basicPostResponse](delURL, map[string]string{"temp": "2"})
+	resp := Delete[*BasicPostResponse](delURL, map[string]string{"temp": "2"})
 	// The response will be the zero value of the type you specified if some errors occur
 	if resp == nil {
 		t.Fatal("Del got nil")
@@ -144,7 +144,7 @@ func TestDel(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// Pass the struct as Json
 	// The struct can also be a pointer.
-	resp2 := Delete[basicPostResponse](delURL, req)
+	resp2 := Delete[BasicPostResponse](delURL, req)
 	data := &testStruct{}
 	json.Unmarshal([]byte(resp2.Data), data)
 
@@ -156,7 +156,7 @@ func TestDel(t *testing.T) {
 func TestDeleteOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// DeleteOpts can support more features
-	resp := DeleteOpts[basicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := DeleteOpts[BasicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(delURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(delURL, "?temp=2"))
 	}
@@ -176,7 +176,7 @@ type FormStruct struct {
 func TestFormData(t *testing.T) {
 	// The Form only support string and []string
 	req := FormStruct{"Hello", "3306", []string{"1", "2", "3"}}
-	resp := PostOpts[basicPostResponse](postURL, NewOption(WithForm(req)))
+	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req)))
 	data := &FormStruct{}
 	bts, _ := json.Marshal(resp.Form)
 	json.Unmarshal(bts, data)
@@ -186,7 +186,7 @@ func TestFormData(t *testing.T) {
 	}
 
 	req2 := map[string]any{"name": "Hello", "numbers": []any{"1", "2", "3"}}
-	resp2 := PostOpts[basicPostResponse](postURL, NewOption(WithForm(req2)))
+	resp2 := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req2)))
 	data2 := map[string]any{}
 	bts, _ = json.Marshal(resp2.Form)
 	json.Unmarshal(bts, &data2)
@@ -198,7 +198,7 @@ func TestFormData(t *testing.T) {
 
 func TestForceHeaders(t *testing.T) {
 	headers := map[string][]string{"Content-Type": {"123"}, "Test-Header": {"1", "2", "3"}}
-	resp := GetOpts[basicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
+	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
 
 	if resp.Headers.ContentType != "123" {
 		t.Errorf("Content-Type got %v but want %v", resp.Headers.ContentType, "123")
@@ -210,7 +210,7 @@ func TestForceHeaders(t *testing.T) {
 
 func TestCookies(t *testing.T) {
 	cookies := []*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}, {Name: "Test", Value: "12345"}}
-	resp := GetOpts[basicGetResponse](getURL, NewOption(WithCookies(cookies)))
+	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithCookies(cookies)))
 
 	if resp.Headers.Cookie != "Test=123; Test2=321; Test=12345" {
 		t.Errorf("Cookies got %v but want %v", resp.Headers.Cookie, "Test=123; Test2=321; Test=12345")
@@ -219,14 +219,14 @@ func TestCookies(t *testing.T) {
 
 func TestTimeout(t *testing.T) {
 	timeout := 1 * time.Millisecond
-	resp := GetOpts[*basicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+	resp := GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
 
 	if resp != nil {
 		t.Error("resp should be nil")
 	}
 
 	timeout = 1 * time.Minute
-	resp = GetOpts[*basicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+	resp = GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
 
 	if resp == nil {
 		t.Fatal("resp got nil")

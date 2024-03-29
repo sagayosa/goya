@@ -12,7 +12,7 @@ func TestDo(t *testing.T) {
 		url    string
 		params any
 		data   any
-		want   *basicGetResponse
+		want   *BasicGetResponse
 	}{
 		{
 			getURL,
@@ -21,13 +21,13 @@ func TestDo(t *testing.T) {
 				"db":   "test",
 			},
 			nil,
-			&basicGetResponse{
+			&BasicGetResponse{
 				Args: map[string]any{
 					"host": "127.0.0.1",
 					"db":   "test",
 				},
 				URL: "http://httpbin.org/get?host=127.0.0.1&db=test",
-				Headers: headers{
+				Headers: Headers{
 					ContentType:   "",
 					ContentLength: "",
 				},
@@ -50,14 +50,14 @@ func TestDo(t *testing.T) {
 				"where":  "id = ?",
 				"?":      3,
 			},
-			&basicGetResponse{
+			&BasicGetResponse{
 				Args: map[string]any{
 					"host":    "127.0.0.1",
 					"db":      "test2",
 					"version": "2",
 				},
 				URL: "http://httpbin.org/get?host=127.0.0.1&db=test2&version=2",
-				Headers: headers{
+				Headers: Headers{
 					ContentType:   "application/json",
 					ContentLength: "49",
 				},
@@ -74,7 +74,7 @@ func TestDo(t *testing.T) {
 			t.Errorf("Do got StatusCode %v but want %v", resp.StatusCode, http.StatusOK)
 		}
 		body, _ := io.ReadAll(resp.Body)
-		basic := &basicGetResponse{}
+		basic := &BasicGetResponse{}
 		json.Unmarshal(body, basic)
 
 		if !compareResp(basic, tt.want) {

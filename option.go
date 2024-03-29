@@ -10,6 +10,7 @@ func NewOption(opts ...OptionFunc) *Option {
 	opt := &Option{
 		before: []BeforeBuildFunc{},
 		after:  []AfterBuildFunc{},
+		client: []ClientBuildFunc{},
 	}
 	for _, f := range opts {
 		b, a, c := f()

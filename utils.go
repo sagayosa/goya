@@ -84,15 +84,15 @@ func stringPlus(strs ...string) string {
 	return builder.String()
 }
 
-type basicGetResponse struct {
+type BasicGetResponse struct {
 	Args    any     `json:"args"`
-	Headers headers `json:"headers"`
+	Headers Headers `json:"headers"`
 	Origin  string  `json:"origin"`
 	URL     string  `json:"url"`
 }
 
-type basicPostResponse struct {
-	Headers headers `json:"headers"`
+type BasicPostResponse struct {
+	Headers Headers `json:"headers"`
 	Origin  string  `json:"origin"`
 	URL     string  `json:"url"`
 	Args    any     `json:"args"`
@@ -101,7 +101,7 @@ type basicPostResponse struct {
 	Form    any     `json:"form"`
 }
 
-type headers struct {
+type Headers struct {
 	Accept         string `json:"Accept"`
 	AcceptEncoding string `json:"Accept-Encoding"`
 	AcceptLanguage string `json:"Accept-Language"`
@@ -113,7 +113,7 @@ type headers struct {
 	Cookie         string `json:"Cookie"`
 }
 
-func compareResp(first *basicGetResponse, second *basicGetResponse) bool {
+func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
 	if first.Headers.ContentType != second.Headers.ContentType {
 		return false
 	}
