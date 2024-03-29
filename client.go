@@ -27,7 +27,7 @@ func NewRequestClient(method, url string, opt *Option, client *http.Client) *Req
 }
 
 // BuildRequest will build the request according to the Option and return the built http request
-// Your modifications to the return value will be reflected in the client
+// Your modifications to the return value will be reflected in the request
 func (c *RequestClient) BuildRequest() *http.Request {
 	builder := NewRequestBuilder(c.Method, c.URL, c.Opt)
 	request := builder.Build()
@@ -38,6 +38,8 @@ func (c *RequestClient) BuildRequest() *http.Request {
 	return c.Request
 }
 
+// BuildClient will build the client according to the Option and return the built http client
+// Your modifications to the return value will be reflected in the client
 func (c *RequestClient) BuildClient() *http.Client {
 	client := &http.Client{}
 	c.Client = client
