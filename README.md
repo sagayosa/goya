@@ -44,8 +44,8 @@ type BasicGetResponse struct {
 func main() {
 	// sample get
 	resp := goya.Get[*BasicGetResponse]("http://httpbin.org/get", nil)
-    // if some errors occurred during the build or request
-    // it will return a zero value of the type you specified
+    	// if some errors occurred during the build or request
+    	// it will return a zero value of the type you specified
 	if resp == nil {
 		log.Fatalln("resp is nil")
 	}
