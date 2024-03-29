@@ -8,7 +8,7 @@ var ts = []struct {
 	url    string
 	params any
 	data   any
-	want   *BasicGetResponse
+	want   *basicGetResponse
 }{
 	{
 		getURL,
@@ -17,13 +17,13 @@ var ts = []struct {
 			"db":   "test",
 		},
 		nil,
-		&BasicGetResponse{
+		&basicGetResponse{
 			Args: map[string]any{
 				"host": "127.0.0.1",
 				"db":   "test",
 			},
 			URL: "http://httpbin.org/get?host=127.0.0.1&db=test",
-			Headers: Headers{
+			Headers: headers{
 				ContentType:   "",
 				ContentLength: "",
 			},
@@ -46,14 +46,14 @@ var ts = []struct {
 			"where":  "id = ?",
 			"?":      3,
 		},
-		&BasicGetResponse{
+		&basicGetResponse{
 			Args: map[string]any{
 				"host":    "127.0.0.1",
 				"db":      "test2",
 				"version": "2",
 			},
 			URL: "http://httpbin.org/get?host=127.0.0.1&db=test2&version=2",
-			Headers: Headers{
+			Headers: headers{
 				ContentType:   "application/json",
 				ContentLength: "49",
 			},
@@ -63,7 +63,7 @@ var ts = []struct {
 
 func TestRequest(t *testing.T) {
 	for _, tt := range ts {
-		resp := Request[BasicGetResponse]("GET", tt.url, NewOption(WithJson(tt.data), WithParams(tt.params)))
+		resp := Request[basicGetResponse]("GET", tt.url, NewOption(WithJson(tt.data), WithParams(tt.params)))
 		if !compareResp(&resp, tt.want) {
 			t.Errorf("Do got body %v but want %v", resp, tt.want)
 		}

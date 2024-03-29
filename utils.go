@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-// ConvertToMapStringAny is mainly used to convert the struct and map into map[string]any
+// convertToMapStringAny is mainly used to convert the struct and map into map[string]any
 // If src is neither a struct nor a map, it will return an error : params is neither struct nor map[string]any
-func ConvertToMapStringAny(src any) (map[string]any, error) {
+func convertToMapStringAny(src any) (map[string]any, error) {
 	result := map[string]any{}
 	tp := reflect.TypeOf(src).Kind()
 	if tp == reflect.Struct || tp == reflect.Pointer {
-		result = ConvertStructToMap(src)
+		result = convertStructToMap(src)
 	} else if tp == reflect.Map {
 		// var ok bool
 		// mp, ok = b.Opt.Params.(map[string]any)
@@ -35,7 +35,7 @@ func ConvertToMapStringAny(src any) (map[string]any, error) {
 
 // src must be struct
 // The index of the result will be the json in the tag of each field if the tag is exist
-func ConvertStructToMap(src any) map[string]any {
+func convertStructToMap(src any) map[string]any {
 	if src == nil {
 		return nil
 	}
@@ -62,9 +62,9 @@ func ConvertStructToMap(src any) map[string]any {
 }
 
 // src must be in the form of http.Request
-// ConvertFormToNormalOne will convert the form to a map[string]any
+// convertFormToNormalOne will convert the form to a map[string]any
 // If []string only has one element, it will be converted to a string.
-func ConvertFormToNormalOne(src map[string][]string) map[string]any {
+func convertFormToNormalOne(src map[string][]string) map[string]any {
 	result := map[string]any{}
 	for k, v := range src {
 		if len(v) == 1 {
@@ -76,7 +76,7 @@ func ConvertFormToNormalOne(src map[string][]string) map[string]any {
 	return result
 }
 
-func StringPlus(strs ...string) string {
+func stringPlus(strs ...string) string {
 	var builder strings.Builder
 	for _, str := range strs {
 		builder.WriteString(str)
@@ -84,15 +84,15 @@ func StringPlus(strs ...string) string {
 	return builder.String()
 }
 
-type BasicGetResponse struct {
+type basicGetResponse struct {
 	Args    any     `json:"args"`
-	Headers Headers `json:"headers"`
+	Headers headers `json:"headers"`
 	Origin  string  `json:"origin"`
 	URL     string  `json:"url"`
 }
 
-type BasicPostResponse struct {
-	Headers Headers `json:"headers"`
+type basicPostResponse struct {
+	Headers headers `json:"headers"`
 	Origin  string  `json:"origin"`
 	URL     string  `json:"url"`
 	Args    any     `json:"args"`
@@ -101,7 +101,7 @@ type BasicPostResponse struct {
 	Form    any     `json:"form"`
 }
 
-type Headers struct {
+type headers struct {
 	Accept         string `json:"Accept"`
 	AcceptEncoding string `json:"Accept-Encoding"`
 	AcceptLanguage string `json:"Accept-Language"`
@@ -113,7 +113,7 @@ type Headers struct {
 	Cookie         string `json:"Cookie"`
 }
 
-func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {
+func compareResp(first *basicGetResponse, second *basicGetResponse) bool {
 	if first.Headers.ContentType != second.Headers.ContentType {
 		return false
 	}

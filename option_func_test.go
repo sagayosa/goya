@@ -145,11 +145,11 @@ func TestWithFormData(t *testing.T) {
 			t.Error(err)
 		}
 
-		want, err := ConvertToMapStringAny(tt.data)
+		want, err := convertToMapStringAny(tt.data)
 		if err != nil {
 			t.Error(err)
 		}
-		form := ConvertFormToNormalOne(r.Form)
+		form := convertFormToNormalOne(r.Form)
 
 		if !reflect.DeepEqual(form, want) {
 			t.Errorf("Build got %v but want %v", form, want)

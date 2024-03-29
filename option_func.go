@@ -30,7 +30,7 @@ func WithJson(data any) OptionFunc {
 				}
 				b.Body = bts
 			}, func(req *http.Request) {
-				req.Header.Set(ContentType, ContentTypeJSON)
+				req.Header.Set(contentType, contentTypeJSON)
 			}, func(client *http.Client) {}
 	}
 }
@@ -46,7 +46,7 @@ func WithForm(data any) OptionFunc {
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		return func(b *RequestBuider) {
-				mp, err := ConvertToMapStringAny(data)
+				mp, err := convertToMapStringAny(data)
 				if err != nil {
 					b.errHappen(err)
 				}
@@ -72,7 +72,7 @@ func WithForm(data any) OptionFunc {
 				writer.Close()
 				b.Body = body.Bytes()
 			}, func(req *http.Request) {
-				req.Header.Set(ContentType, writer.FormDataContentType())
+				req.Header.Set(contentType, writer.FormDataContentType())
 			}, func(client *http.Client) {}
 	}
 }
@@ -86,7 +86,7 @@ func WithParams(params any) OptionFunc {
 			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		return func(b *RequestBuider) {
-			mp, err := ConvertToMapStringAny(params)
+			mp, err := convertToMapStringAny(params)
 			if err != nil {
 				b.errHappen(err)
 			}
