@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type TestStruct struct {
@@ -213,5 +214,24 @@ func TestCookies(t *testing.T) {
 
 	if resp.Headers.Cookie != "Test=123; Test2=321; Test=12345" {
 		t.Errorf("Cookies got %v but want %v", resp.Headers.Cookie, "Test=123; Test2=321; Test=12345")
+	}
+}
+
+func TestTimeout(t *testing.T) {
+	timeout := 1 * time.Millisecond
+	resp := GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+
+	if resp != nil {
+		t.Error("resp should be nil")
+	}
+
+	timeout = 1 * time.Minute
+	resp = GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+
+	if resp == nil {
+		t.Fatal("resp got nil")
+	}
+	if resp.URL != getURL {
+		t.Errorf("url got %v but want %v", resp.URL, getURL)
 	}
 }
