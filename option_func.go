@@ -14,6 +14,8 @@ type OptionFunc func(any) (BeforeBuildFunc, AfterBuildFunc)
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
 
+// WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
+// data can be struct or map
 func WithJson(data any) OptionFunc {
 	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
 		if data == nil {
@@ -31,6 +33,9 @@ func WithJson(data any) OptionFunc {
 	}
 }
 
+// WithForm will inject data into the body of the request in form data and set the Content-Type to multipart/form-data
+// data can be struct or map but the form data only support string and []string as values
+// Therefore, if the value is not the string or []string, it will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithForm(data any) OptionFunc {
 	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
 		if data == nil {
@@ -70,6 +75,9 @@ func WithForm(data any) OptionFunc {
 	}
 }
 
+// WithParams will inject data into the URL as the query params
+// data can be struct or map
+// but the value will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithParams(params any) OptionFunc {
 	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
 		if params == nil {
