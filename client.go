@@ -58,7 +58,7 @@ func (c *RequestClient) Do() *http.Response {
 	}
 	resp, err := c.Client.Do(c.Request)
 	if err != nil {
-		c.errHappen(err)
+		c.ErrHappen(err)
 	}
 	return resp
 }
@@ -72,6 +72,7 @@ func (c *RequestClient) Errors() []error {
 	return c.errs
 }
 
-func (c *RequestClient) errHappen(err error) {
+// ErrHappen will add err to c.errs
+func (c *RequestClient) ErrHappen(err error) {
 	c.errs = append(c.errs, err)
 }

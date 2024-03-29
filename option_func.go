@@ -21,12 +21,12 @@ type ClientBuildFunc func(client *http.Client)
 func WithJson(data any) OptionFunc {
 	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		return func(b *RequestBuider) {
 				bts, err := json.Marshal(data)
 				if err != nil {
-					b.errHappen(err)
+					b.ErrHappen(err)
 				}
 				b.Body = bts
 			}, func(req *http.Request) {
@@ -41,14 +41,14 @@ func WithJson(data any) OptionFunc {
 func WithForm(data any) OptionFunc {
 	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		return func(b *RequestBuider) {
 				mp, err := convertToMapStringAny(data)
 				if err != nil {
-					b.errHappen(err)
+					b.ErrHappen(err)
 				}
 				// The form data must be of type map[string]string or map[string][]string.
 				// Therefore, I distinguish between the slice and other types, and use fmt.Sprintf directly.
@@ -59,13 +59,13 @@ func WithForm(data any) OptionFunc {
 							element := val.Index(i)
 							err := writer.WriteField(k, fmt.Sprintf("%v", element))
 							if err != nil {
-								b.errHappen(err)
+								b.ErrHappen(err)
 							}
 						}
 					} else {
 						err := writer.WriteField(k, fmt.Sprintf("%v", v))
 						if err != nil {
-							b.errHappen(err)
+							b.ErrHappen(err)
 						}
 					}
 				}
@@ -83,17 +83,17 @@ func WithForm(data any) OptionFunc {
 func WithParams(params any) OptionFunc {
 	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if params == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		return func(b *RequestBuider) {
 			mp, err := convertToMapStringAny(params)
 			if err != nil {
-				b.errHappen(err)
+				b.ErrHappen(err)
 			}
 
 			parsedURL, err := url.Parse(b.URL)
 			if err != nil {
-				b.errHappen(fmt.Errorf("URL is invalid : %w", err))
+				b.ErrHappen(fmt.Errorf("URL is invalid : %w", err))
 				return
 			}
 			querys := parsedURL.Query()

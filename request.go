@@ -37,7 +37,7 @@ func (b *RequestBuider) Build() *http.Request {
 
 	request, err := http.NewRequest(b.method, b.URL, bytes.NewBuffer(b.Body))
 	if err != nil {
-		b.errHappen(err)
+		b.ErrHappen(err)
 	}
 
 	for _, after := range b.Opt.after {
@@ -55,6 +55,7 @@ func (b *RequestBuider) Errors() []error {
 	return b.errs
 }
 
-func (b *RequestBuider) errHappen(err error) {
+// ErrHappen will add err to b.errs
+func (b *RequestBuider) ErrHappen(err error) {
 	b.errs = append(b.errs, err)
 }

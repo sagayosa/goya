@@ -19,7 +19,7 @@ func convertToMapStringAny(src any) (map[string]any, error) {
 		// var ok bool
 		// mp, ok = b.Opt.Params.(map[string]any)
 		// if !ok {
-		// 	b.errHappen(fmt.Errorf("params is map but not the map[string]any"))
+		// 	b.ErrHappen(fmt.Errorf("params is map but not the map[string]any"))
 		// 	return
 		// }
 		rv := reflect.ValueOf(src)
