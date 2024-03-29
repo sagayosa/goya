@@ -107,6 +107,7 @@ func WithParams(params any) OptionFunc {
 	}
 }
 
+// WithForceHeaders will inject all key value pairs from the headers into the *http.Request's Header
 func WithForceHeaders(headers http.Header) OptionFunc {
 	return func() (BeforeBuildFunc, AfterBuildFunc) {
 		return func(b *RequestBuider) {}, func(req *http.Request) {
