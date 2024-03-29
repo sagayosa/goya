@@ -11,23 +11,27 @@ import (
 )
 
 type RequestBuider struct {
-	Method string
-	URL    string
-	Opt    *Option
+	method    string
+	originURL string
+	Opt       *Option
 
 	errs []error
-	url  string
-	body []byte
+	// URL will be passed to NewRequest to create *http.Request,
+	// so you can directly modify this field to get expected request
+	URL string
+	// Body will be passed to NewRequest to create *http.Request,
+	// so you can directly modify this field to get expected request
+	Body []byte
 }
 
 func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
 	return &RequestBuider{
-		Method: method,
-		URL:    url,
-		Opt:    opt,
+		method:    method,
+		originURL: url,
+		Opt:       opt,
 
 		errs: make([]error, 0),
-		url:  url,
+		URL:  url,
 	}
 }
 
@@ -36,7 +40,7 @@ func (b *RequestBuider) Build() *http.Request {
 		b.buildBody()
 		b.buildURL()
 	}
-	request, err := http.NewRequest(b.Method, b.url, bytes.NewBuffer(b.body))
+	request, err := http.NewRequest(b.method, b.URL, bytes.NewBuffer(b.Body))
 	if err != nil {
 		b.errHappen(err)
 	}
@@ -85,7 +89,7 @@ func (b *RequestBuider) buildJson() {
 	if err != nil {
 		b.errHappen(err)
 	}
-	b.body = bts
+	b.Body = bts
 
 	b.Opt.Headers[ContentType] = ContentTypeJSON
 }
@@ -117,7 +121,7 @@ func (b *RequestBuider) buildFormData() {
 		}
 	}
 	writer.Close()
-	b.body = body.Bytes()
+	b.Body = body.Bytes()
 
 	b.Opt.Headers[ContentType] = writer.FormDataContentType()
 }
@@ -141,5 +145,5 @@ func (b *RequestBuider) buildParams() {
 	}
 
 	parsedURL.RawQuery = querys.Encode()
-	b.url = parsedURL.String()
+	b.URL = parsedURL.String()
 }
