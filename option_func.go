@@ -10,14 +10,14 @@ import (
 	"reflect"
 )
 
-type OptionFunc func(any) (BeforeBuildFunc, AfterBuildFunc)
+type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc)
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
 
 // WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
 // data can be struct or map
 func WithJson(data any) OptionFunc {
-	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc) {
 		if data == nil {
 			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}
 		}
@@ -37,7 +37,7 @@ func WithJson(data any) OptionFunc {
 // data can be struct or map but the form data only support string and []string as values
 // Therefore, if the value is not the string or []string, it will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithForm(data any) OptionFunc {
-	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc) {
 		if data == nil {
 			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}
 		}
@@ -79,7 +79,7 @@ func WithForm(data any) OptionFunc {
 // data can be struct or map
 // but the value will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithParams(params any) OptionFunc {
-	return func(a any) (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc) {
 		if params == nil {
 			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}
 		}
@@ -104,5 +104,21 @@ func WithParams(params any) OptionFunc {
 			parsedURL.RawQuery = querys.Encode()
 			b.URL = parsedURL.String()
 		}, func(req *http.Request) {}
+	}
+}
+
+func WithForceHeaders(headers http.Header) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc) {
+		return func(b *RequestBuider) {}, func(req *http.Request) {
+			for k, v := range headers {
+				for i, h := range v {
+					if i == 0 {
+						req.Header.Set(k, h)
+						continue
+					}
+					req.Header.Add(k, h)
+				}
+			}
+		}
 	}
 }

@@ -11,7 +11,7 @@ func NewOption(opts ...OptionFunc) *Option {
 		after:  []AfterBuildFunc{},
 	}
 	for _, f := range opts {
-		b, a := f(opt)
+		b, a := f()
 		opt.before = append(opt.before, b)
 		opt.after = append(opt.after, a)
 	}

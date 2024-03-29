@@ -67,6 +67,9 @@ func TestDo(t *testing.T) {
 
 	for _, tt := range ts {
 		resp := NewRequestClient("GET", tt.url, NewOption(WithJson(tt.data), WithParams(tt.params)), nil).Do()
+		if resp == nil {
+			t.Fatal("Do got nil")
+		}
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Do got StatusCode %v but want %v", resp.StatusCode, http.StatusOK)
 		}
