@@ -109,6 +109,7 @@ type Headers struct {
 	UserAgent      string `json:"User-Agent"`
 	ContentType    string `json:"Content-Type"`
 	ContentLength  string `json:"Content-Length"`
+	TestHeader     any    `json:"Test-Header"`
 }
 
 func compareResp(first *BasicGetResponse, second *BasicGetResponse) bool {

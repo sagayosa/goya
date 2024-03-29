@@ -193,3 +193,15 @@ func TestFormData(t *testing.T) {
 		t.Errorf("resp.Form got %v but want %v", data2, req2)
 	}
 }
+
+func TestForceHeaders(t *testing.T) {
+	headers := map[string][]string{"Content-Type": {"123"}, "Test-Header": {"1", "2", "3"}}
+	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
+
+	if resp.Headers.ContentType != "123" {
+		t.Errorf("Content-Type got %v but want %v", resp.Headers.ContentType, "123")
+	}
+	if resp.Headers.TestHeader != "1,2,3" {
+		t.Errorf("Content-Type got %v but want %v", resp.Headers.TestHeader, "1,2,3")
+	}
+}
