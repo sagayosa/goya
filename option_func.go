@@ -125,6 +125,7 @@ func WithForceHeaders(headers http.Header) OptionFunc {
 	}
 }
 
+// WithCookies will inject all cookies into the *http.Request's Cookie
 func WithCookies(cookies []*http.Cookie) OptionFunc {
 	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		return func(b *RequestBuider) {}, func(req *http.Request) {
