@@ -42,6 +42,9 @@ func (c *RequestClient) BuildRequest() *http.Request {
 // Your modifications to the return value will be reflected in the client
 func (c *RequestClient) BuildClient() *http.Client {
 	client := &http.Client{}
+	for _, f := range c.Opt.client {
+		f(client)
+	}
 	c.Client = client
 	return c.Client
 }

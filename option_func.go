@@ -10,16 +10,17 @@ import (
 	"reflect"
 )
 
-type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc)
+type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc)
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
+type ClientBuildFunc func(client *http.Client)
 
 // WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
 // data can be struct or map
 func WithJson(data any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}
+			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		return func(b *RequestBuider) {
 				bts, err := json.Marshal(data)
@@ -29,7 +30,7 @@ func WithJson(data any) OptionFunc {
 				b.Body = bts
 			}, func(req *http.Request) {
 				req.Header.Set(ContentType, ContentTypeJSON)
-			}
+			}, func(client *http.Client) {}
 	}
 }
 
@@ -37,9 +38,9 @@ func WithJson(data any) OptionFunc {
 // data can be struct or map but the form data only support string and []string as values
 // Therefore, if the value is not the string or []string, it will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithForm(data any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}
+			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
@@ -71,7 +72,7 @@ func WithForm(data any) OptionFunc {
 				b.Body = body.Bytes()
 			}, func(req *http.Request) {
 				req.Header.Set(ContentType, writer.FormDataContentType())
-			}
+			}, func(client *http.Client) {}
 	}
 }
 
@@ -79,9 +80,9 @@ func WithForm(data any) OptionFunc {
 // data can be struct or map
 // but the value will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithParams(params any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		if params == nil {
-			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}
+			return func(b *RequestBuider) { b.errHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
 		}
 		return func(b *RequestBuider) {
 			mp, err := ConvertToMapStringAny(params)
@@ -103,13 +104,13 @@ func WithParams(params any) OptionFunc {
 
 			parsedURL.RawQuery = querys.Encode()
 			b.URL = parsedURL.String()
-		}, func(req *http.Request) {}
+		}, func(req *http.Request) {}, func(client *http.Client) {}
 	}
 }
 
 // WithForceHeaders will inject all key value pairs from the headers into the *http.Request's Header
 func WithForceHeaders(headers http.Header) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
 		return func(b *RequestBuider) {}, func(req *http.Request) {
 			for k, v := range headers {
 				for i, h := range v {
@@ -120,6 +121,6 @@ func WithForceHeaders(headers http.Header) OptionFunc {
 					req.Header.Add(k, h)
 				}
 			}
-		}
+		}, func(client *http.Client) {}
 	}
 }

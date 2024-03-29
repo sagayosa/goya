@@ -3,6 +3,7 @@ package goya
 type Option struct {
 	before []BeforeBuildFunc
 	after  []AfterBuildFunc
+	client []ClientBuildFunc
 }
 
 func NewOption(opts ...OptionFunc) *Option {
@@ -11,9 +12,10 @@ func NewOption(opts ...OptionFunc) *Option {
 		after:  []AfterBuildFunc{},
 	}
 	for _, f := range opts {
-		b, a := f()
+		b, a, c := f()
 		opt.before = append(opt.before, b)
 		opt.after = append(opt.after, a)
+		opt.client = append(opt.client, c)
 	}
 	return opt
 }
