@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"time"
 )
 
 type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc)
@@ -133,5 +134,14 @@ func WithCookies(cookies []*http.Cookie) OptionFunc {
 				req.AddCookie(c)
 			}
 		}, func(client *http.Client) {}
+	}
+}
+
+// WithTimeout will set timeout to *http.Client.Timeout
+func WithTimeout(timeout time.Duration) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+		return func(b *RequestBuider) {}, func(req *http.Request) {}, func(client *http.Client) {
+			client.Timeout = timeout
+		}
 	}
 }
