@@ -2,12 +2,7 @@ package goya
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
-	"mime/multipart"
 	"net/http"
-	"net/url"
-	"reflect"
 )
 
 type RequestBuider struct {
@@ -36,17 +31,17 @@ func NewRequestBuilder(method, url string, opt *Option) *RequestBuider {
 }
 
 func (b *RequestBuider) Build() *http.Request {
-	if b.Opt != nil {
-		b.buildBody()
-		b.buildURL()
+	for _, before := range b.Opt.before {
+		before(b)
 	}
+
 	request, err := http.NewRequest(b.method, b.URL, bytes.NewBuffer(b.Body))
 	if err != nil {
 		b.errHappen(err)
 	}
 
-	if b.Opt != nil {
-		b.buildHeaders(request)
+	for _, after := range b.Opt.after {
+		after(request)
 	}
 	return request
 }
@@ -64,86 +59,86 @@ func (b *RequestBuider) errHappen(err error) {
 	b.errs = append(b.errs, err)
 }
 
-func (b *RequestBuider) buildHeaders(req *http.Request) {
-	for k, v := range b.Opt.Headers {
-		req.Header.Set(k, v)
-	}
-}
+// func (b *RequestBuider) buildHeaders(req *http.Request) {
+// 	for k, v := range b.Opt.Headers {
+// 		req.Header.Set(k, v)
+// 	}
+// }
 
-func (b *RequestBuider) buildBody() {
-	if b.Opt.Json != nil {
-		b.buildJson()
-	} else if b.Opt.FormData != nil {
-		b.buildFormData()
-	}
-}
+// func (b *RequestBuider) buildBody() {
+// 	if b.Opt.Json != nil {
+// 		b.buildJson()
+// 	} else if b.Opt.FormData != nil {
+// 		b.buildFormData()
+// 	}
+// }
 
-func (b *RequestBuider) buildURL() {
-	if b.Opt.Params != nil {
-		b.buildParams()
-	}
-}
+// func (b *RequestBuider) buildURL() {
+// 	if b.Opt.Params != nil {
+// 		b.buildParams()
+// 	}
+// }
 
-func (b *RequestBuider) buildJson() {
-	bts, err := json.Marshal(b.Opt.Json)
-	if err != nil {
-		b.errHappen(err)
-	}
-	b.Body = bts
+// func (b *RequestBuider) buildJson() {
+// 	bts, err := json.Marshal(b.Opt.Json)
+// 	if err != nil {
+// 		b.errHappen(err)
+// 	}
+// 	b.Body = bts
 
-	b.Opt.Headers[ContentType] = ContentTypeJSON
-}
+// 	b.Opt.Headers[ContentType] = ContentTypeJSON
+// }
 
-func (b *RequestBuider) buildFormData() {
-	mp, err := ConvertToMapStringAny(b.Opt.FormData)
-	if err != nil {
-		b.errHappen(err)
-	}
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	// The form data must be of type map[string]string or map[string][]string.
-	// Therefore, I distinguish between the slice and other types, and use fmt.Sprintf directly.
-	for k, v := range mp {
-		val := reflect.ValueOf(v)
-		if val.Kind() == reflect.Slice {
-			for i := 0; i < val.Len(); i++ {
-				element := val.Index(i)
-				err := writer.WriteField(k, fmt.Sprintf("%v", element))
-				if err != nil {
-					b.errHappen(err)
-				}
-			}
-		} else {
-			err := writer.WriteField(k, fmt.Sprintf("%v", v))
-			if err != nil {
-				b.errHappen(err)
-			}
-		}
-	}
-	writer.Close()
-	b.Body = body.Bytes()
+// func (b *RequestBuider) buildFormData() {
+// 	mp, err := ConvertToMapStringAny(b.Opt.FormData)
+// 	if err != nil {
+// 		b.errHappen(err)
+// 	}
+// 	body := &bytes.Buffer{}
+// 	writer := multipart.NewWriter(body)
+// 	// The form data must be of type map[string]string or map[string][]string.
+// 	// Therefore, I distinguish between the slice and other types, and use fmt.Sprintf directly.
+// 	for k, v := range mp {
+// 		val := reflect.ValueOf(v)
+// 		if val.Kind() == reflect.Slice {
+// 			for i := 0; i < val.Len(); i++ {
+// 				element := val.Index(i)
+// 				err := writer.WriteField(k, fmt.Sprintf("%v", element))
+// 				if err != nil {
+// 					b.errHappen(err)
+// 				}
+// 			}
+// 		} else {
+// 			err := writer.WriteField(k, fmt.Sprintf("%v", v))
+// 			if err != nil {
+// 				b.errHappen(err)
+// 			}
+// 		}
+// 	}
+// 	writer.Close()
+// 	b.Body = body.Bytes()
 
-	b.Opt.Headers[ContentType] = writer.FormDataContentType()
-}
+// 	b.Opt.Headers[ContentType] = writer.FormDataContentType()
+// }
 
-func (b *RequestBuider) buildParams() {
-	mp, err := ConvertToMapStringAny(b.Opt.Params)
-	if err != nil {
-		b.errHappen(err)
-	}
+// func (b *RequestBuider) buildParams() {
+// 	mp, err := ConvertToMapStringAny(b.Opt.Params)
+// 	if err != nil {
+// 		b.errHappen(err)
+// 	}
 
-	parsedURL, err := url.Parse(b.URL)
-	if err != nil {
-		b.errHappen(fmt.Errorf("URL is invalid : %w", err))
-		return
-	}
-	querys := parsedURL.Query()
-	// The params must be string
-	// Therefore, i use fmt.Sprintf directly
-	for k, v := range mp {
-		querys.Add(k, fmt.Sprintf("%v", v))
-	}
+// 	parsedURL, err := url.Parse(b.URL)
+// 	if err != nil {
+// 		b.errHappen(fmt.Errorf("URL is invalid : %w", err))
+// 		return
+// 	}
+// 	querys := parsedURL.Query()
+// 	// The params must be string
+// 	// Therefore, i use fmt.Sprintf directly
+// 	for k, v := range mp {
+// 		querys.Add(k, fmt.Sprintf("%v", v))
+// 	}
 
-	parsedURL.RawQuery = querys.Encode()
-	b.URL = parsedURL.String()
-}
+// 	parsedURL.RawQuery = querys.Encode()
+// 	b.URL = parsedURL.String()
+// }

@@ -39,7 +39,7 @@ func TestBuildJson(t *testing.T) {
 
 	for _, tt := range ts {
 		b := NewRequestBuilder("GET", tt.url, NewOption(WithJson(tt.data)))
-		b.buildJson()
+		b.Build()
 
 		want, _ := json.Marshal(tt.data)
 
@@ -98,7 +98,7 @@ func TestBuildParams(t *testing.T) {
 
 	for _, tt := range ts {
 		b := NewRequestBuilder("GET", tt.url, NewOption(WithParams(tt.data)))
-		b.buildParams()
+		b.Build()
 
 		parsedWant, _ := url.Parse(tt.want)
 		parsedGot, _ := url.Parse(b.URL)
