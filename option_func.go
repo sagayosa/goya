@@ -124,3 +124,13 @@ func WithForceHeaders(headers http.Header) OptionFunc {
 		}, func(client *http.Client) {}
 	}
 }
+
+func WithCookies(cookies []*http.Cookie) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+		return func(b *RequestBuider) {}, func(req *http.Request) {
+			for _, c := range cookies {
+				req.AddCookie(c)
+			}
+		}, func(client *http.Client) {}
+	}
+}
