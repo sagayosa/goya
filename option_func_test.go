@@ -182,3 +182,25 @@ func TestWithForceHeaders(t *testing.T) {
 		}
 	}
 }
+
+func TestWithCookies(t *testing.T) {
+	ts := []struct {
+		url     string
+		cookies []*http.Cookie
+	}{
+		{
+			"http://127.0.0.1:3306",
+			[]*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}},
+		},
+	}
+
+	for _, tt := range ts {
+		b := NewRequestBuilder("GET", tt.url, NewOption(WithCookies(tt.cookies)))
+		r := b.Build()
+
+		cookies := r.Cookies()
+		if !reflect.DeepEqual(cookies, tt.cookies) {
+			t.Errorf("cookies got %v but want %v", cookies, tt.cookies)
+		}
+	}
+}
