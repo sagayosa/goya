@@ -70,6 +70,9 @@ func Request[T any](method, URL string, opt *Option) T {
 // 	return DeleteOpts[T](URL, NewOption(WithJson(body)))
 // }
 
+// Get send a request to the URL
+// If opt is *Option, the request will be built based on the specified options.
+// If the opt is not *Option, the opt will be parsed as params
 func Get[T any, R any | *Option](URL string, opt R) T {
 	switch v := any(opt).(type) {
 	case *Option:
@@ -79,6 +82,9 @@ func Get[T any, R any | *Option](URL string, opt R) T {
 	}
 }
 
+// Post send a request to the URL
+// If opt is *Option, the request will be built based on the specified options.
+// If the opt is not *Option, the opt will be parsed as json
 func Post[T any, R any | *Option](URL string, opt R) T {
 	switch v := any(opt).(type) {
 	case *Option:
@@ -88,6 +94,9 @@ func Post[T any, R any | *Option](URL string, opt R) T {
 	}
 }
 
+// Put send a request to the URL
+// If opt is *Option, the request will be built based on the specified options.
+// If the opt is not *Option, the opt will be parsed as json
 func Put[T any, R any | *Option](URL string, opt R) T {
 	switch v := any(opt).(type) {
 	case *Option:
@@ -97,6 +106,9 @@ func Put[T any, R any | *Option](URL string, opt R) T {
 	}
 }
 
+// Delete send a request to the URL
+// If opt is *Option, the request will be built based on the specified options.
+// If the opt is not *Option, the opt will be parsed as json
 func Delete[T any, R any | *Option](URL string, opt R) T {
 	switch v := any(opt).(type) {
 	case *Option:
