@@ -15,7 +15,7 @@ type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, Client
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
 type ClientBuildFunc func(client *http.Client)
-type ClientDoneFunc func(client *RequestClient)
+type ClientDoneFunc func(errs []error, resp *Response)
 
 // WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
 // data can be struct or map
@@ -153,5 +153,14 @@ func WithForceHeader(header string, value string) OptionFunc {
 		return nil, func(req *http.Request) {
 			req.Header.Set(header, value)
 		}, nil, nil
+	}
+}
+
+// WithError will set the errors that occur during request generation and sending to errs
+func WithError(errs *[]error) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		return nil, nil, nil, func(errors []error, resp *Response) {
+			*errs = errors
+		}
 	}
 }

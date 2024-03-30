@@ -60,6 +60,10 @@ func (c *RequestClient) Do() *Response {
 	if err != nil {
 		c.ErrHappen(err)
 	}
+	result := NewResponse(resp)
+	for _, d := range c.Opt.done {
+		d(c.errs, result)
+	}
 	return NewResponse(resp)
 }
 

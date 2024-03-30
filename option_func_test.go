@@ -232,3 +232,15 @@ func TestTimeout(t *testing.T) {
 		t.Errorf("url got %v but want %v", resp.URL, getURL)
 	}
 }
+
+func TestWithErrors(t *testing.T) {
+	errs := []error{}
+	resp := Get[*BasicGetResponse]("1", NewOption(WithError(&errs)))
+	if resp != nil {
+		t.Error("resp should be nil")
+	}
+
+	if len(errs) == 0 {
+		t.Error("errs got nil")
+	}
+}
