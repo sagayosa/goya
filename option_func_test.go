@@ -3,229 +3,232 @@ package goya
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"reflect"
 	"testing"
+	"time"
 )
 
-func TestWithJson(t *testing.T) {
-	ts := []struct {
-		url  string
-		data any
-	}{
-		{
-			"http://127.0.0.1:3306",
-			map[string]any{
-				"host": "127.0.0.1",
-				"db":   "test",
-			},
-		},
-		{
-			"http://127.0.0.1:3306",
-			struct {
-				Host    string `json:"host"`
-				Db      string `json:"db"`
-				Version int    `json:"version"`
-			}{
-				"127.0.0.1",
-				"test2",
-				2,
-			},
-		},
-		{
-			"http://127.0.0.1:3306",
-			2,
-		},
+type testStruct struct {
+	Name string `json:"name"`
+	ID   int    `json:"id"`
+}
+
+func TestGet(t *testing.T) {
+	// Pass the map as params
+	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
+	resp := Get[*BasicGetResponse](getURL, map[string]string{"temp": "2"})
+	// The response will be the zero value of the type you specified if some errors occur
+	if resp == nil {
+		t.Fatal("Get got nil")
+	}
+	if resp.URL != stringPlus(getURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(getURL, "?temp=2"))
 	}
 
-	for _, tt := range ts {
-		b := NewRequestBuilder("GET", tt.url, NewOption(WithJson(tt.data)))
-		b.Build()
-
-		want, _ := json.Marshal(tt.data)
-
-		if !reflect.DeepEqual(b.Body, want) {
-			t.Errorf("buildJson got %v but want %v", b.Body, want)
-		}
+	req := testStruct{"Hello", 3306}
+	// Pass the struct as params
+	resp2 := Get[BasicGetResponse](getURL, req)
+	// The order of the queries will be random
+	if resp2.URL != stringPlus(getURL, "?name=Hello&id=3306") && resp2.URL != stringPlus(getURL, "?id=3306&name=Hello") {
+		t.Errorf("resp.URL got %v but want %v", resp2.URL, stringPlus(getURL, "?name=Hello&id=3306"))
+	}
+	// You can also pass the pointer of the struct
+	resp3 := Get[BasicGetResponse](getURL, &req)
+	if resp3.URL != stringPlus(getURL, "?name=Hello&id=3306") && resp3.URL != stringPlus(getURL, "?id=3306&name=Hello") {
+		t.Errorf("resp.URL got %v but want %v", resp3.URL, stringPlus(getURL, "?name=Hello&id=3306"))
 	}
 }
 
-func TestWithParams(t *testing.T) {
-	ts := []struct {
-		url  string
-		data any
-		want string
-	}{
-		{
-			"http://127.0.0.1:3306",
-			map[string]any{
-				"host": "127.0.0.1",
-				"db":   "test",
-			},
-			"http://127.0.0.1:3306?host=127.0.0.1&db=test",
-		},
-		{
-			"http://127.0.0.1:3306",
-			struct {
-				Host    string `json:"host"`
-				Db      string `json:"db"`
-				Version int    `json:"version"`
-			}{
-				"127.0.0.1",
-				"test2",
-				2,
-			},
-			"http://127.0.0.1:3306?host=127.0.0.1&db=test2&version=2",
-		},
-		{
-			"http://127.0.0.1:3306?temp=114514",
-			struct {
-				Host    string `json:"host"`
-				Db      string `json:"db"`
-				Version int    `json:"version"`
-			}{
-				"127.0.0.1",
-				"test2",
-				2,
-			},
-			"http://127.0.0.1:3306?host=127.0.0.1&db=test2&version=2&temp=114514",
-		},
-		{
-			"http://127.0.0.1:3306",
-			3306,
-			"http://127.0.0.1:3306",
-		},
-	}
-
-	for _, tt := range ts {
-		b := NewRequestBuilder("GET", tt.url, NewOption(WithParams(tt.data)))
-		b.Build()
-
-		parsedWant, _ := url.Parse(tt.want)
-		parsedGot, _ := url.Parse(b.URL)
-
-		if !reflect.DeepEqual(parsedGot.Query(), parsedWant.Query()) {
-			t.Errorf("Build got %v but want %v", b.URL, tt.want)
-		}
+func TestGetOpts(t *testing.T) {
+	resp := Get[BasicGetResponse](getURL, NewOption(WithParams(map[string]string{"temp": "2"})))
+	if resp.URL != stringPlus(getURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(getURL, "?temp=2"))
 	}
 }
 
-func TestWithFormData(t *testing.T) {
-	ts := []struct {
-		url  string
-		data any
-	}{
-		{
-			"http://127.0.0.1:3306",
-			map[string]any{
-				"host": "127.0.0.1",
-				"db":   "test",
-				"form": []string{"1", "2", "goya!!!!!"},
-			},
-		},
-		{
-			"http://127.0.0.1:3306",
-			struct {
-				Host    string `json:"host"`
-				Db      string `json:"db"`
-				Version string `json:"version"`
-			}{
-				"127.0.0.1",
-				"test2",
-				"2",
-			},
-		},
+func TestPost(t *testing.T) {
+	// Pass the map as Json
+	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
+	resp := Post[*BasicPostResponse](postURL, map[string]string{"temp": "2"})
+	// The response will be the zero value of the type you specified if some errors occur
+	if resp == nil {
+		t.Fatal("Post got nil")
+	}
+	mp := map[string]string{}
+	json.Unmarshal([]byte(resp.Data), &mp)
+	if !reflect.DeepEqual(mp, map[string]string{"temp": "2"}) {
+		t.Errorf("resp.Data got %v but want %v", mp, map[string]string{"temp": "2"})
 	}
 
-	for _, tt := range ts {
-		b := NewRequestBuilder("POST", tt.url, NewOption(WithForm(tt.data)))
-		// b.buildFormData()
-		r := b.Build()
-		if err := r.ParseMultipartForm(20 << 32); err != nil {
-			t.Error(err)
-		}
+	req := testStruct{"Hello", 3306}
+	// Pass the struct as Json
+	// The struct can also be a pointer.
+	resp2 := Post[BasicPostResponse](postURL, req)
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp2.Data), data)
 
-		want, err := convertToMapStringAny(tt.data)
-		if err != nil {
-			t.Error(err)
-		}
-		form := convertFormToNormalOne(r.Form)
-
-		if !reflect.DeepEqual(form, want) {
-			t.Errorf("Build got %v but want %v", form, want)
-		}
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
 	}
 }
 
-func TestWithForceHeaders(t *testing.T) {
-	ts := []struct {
-		url     string
-		headers map[string][]string
-	}{
-		{
-			"http://127.0.0.1:3306",
-			map[string][]string{"T": {"R"}, "R": {"T"}, "RT": {"T", "R"}, "TR": {"R", "T"}},
-		},
+func TestPostOpts(t *testing.T) {
+	req := testStruct{"Hello", 3306}
+	resp := Post[BasicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	if resp.URL != stringPlus(postURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(postURL, "?temp=2"))
 	}
-	for _, tt := range ts {
-		b := NewRequestBuilder("GET", tt.url, NewOption(WithForceHeaders(tt.headers)))
-		r := b.Build()
-
-		for k, v := range tt.headers {
-			rv, ok := r.Header[http.CanonicalHeaderKey(k)]
-			if !ok {
-				t.Errorf("header %v not set", k)
-			}
-			if !reflect.DeepEqual(v, rv) {
-				t.Errorf("header %v got %v but want %v", k, rv, v)
-			}
-		}
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp.Data), data)
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
 	}
 }
 
-func TestWithCookies(t *testing.T) {
-	ts := []struct {
-		url     string
-		cookies []*http.Cookie
-	}{
-		{
-			"http://127.0.0.1:3306",
-			[]*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}},
-		},
+func TestPut(t *testing.T) {
+	// Pass the map as Json
+	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
+	resp := Put[*BasicPostResponse](putURL, map[string]string{"temp": "2"})
+	// The response will be the zero value of the type you specified if some errors occur
+	if resp == nil {
+		t.Fatal("Put got nil")
+	}
+	mp := map[string]string{}
+	json.Unmarshal([]byte(resp.Data), &mp)
+	if !reflect.DeepEqual(mp, map[string]string{"temp": "2"}) {
+		t.Errorf("resp.Data got %v but want %v", mp, map[string]string{"temp": "2"})
 	}
 
-	for _, tt := range ts {
-		b := NewRequestBuilder("GET", tt.url, NewOption(WithCookies(tt.cookies)))
-		r := b.Build()
+	req := testStruct{"Hello", 3306}
+	// Pass the struct as Json
+	// The struct can also be a pointer.
+	resp2 := Put[BasicPostResponse](putURL, req)
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp2.Data), data)
 
-		cookies := r.Cookies()
-		if !reflect.DeepEqual(cookies, tt.cookies) {
-			t.Errorf("cookies got %v but want %v", cookies, tt.cookies)
-		}
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
 	}
 }
 
-func TestWithForceHeader(t *testing.T) {
-	ts := []struct {
-		url    string
-		header string
-		value  string
-	}{
-		{
-			"http://127.0.0.1:3306",
-			"T", "R",
-		},
+func TestPutOpts(t *testing.T) {
+	req := testStruct{"Hello", 3306}
+	resp := Put[BasicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	if resp.URL != stringPlus(putURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(putURL, "?temp=2"))
 	}
-	for _, tt := range ts {
-		b := NewRequestBuilder("GET", tt.url, NewOption(WithForceHeader(tt.header, tt.value)))
-		r := b.Build()
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp.Data), data)
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
 
-		rv, ok := r.Header[http.CanonicalHeaderKey(tt.header)]
-		if !ok {
-			t.Errorf("header %v not set", tt.header)
-		}
-		if !reflect.DeepEqual(tt.value, rv[0]) {
-			t.Errorf("header %v got %v but want %v", tt.header, rv[0], tt.value)
-		}
+func TestDel(t *testing.T) {
+	// Pass the map as Json
+	// The map can be map[any]any, but the first 'any' will be changed to a string using fmt.Sprintf.
+	resp := Delete[*BasicPostResponse](delURL, map[string]string{"temp": "2"})
+	// The response will be the zero value of the type you specified if some errors occur
+	if resp == nil {
+		t.Fatal("Del got nil")
+	}
+	mp := map[string]string{}
+	json.Unmarshal([]byte(resp.Data), &mp)
+	if !reflect.DeepEqual(mp, map[string]string{"temp": "2"}) {
+		t.Errorf("resp.Data got %v but want %v", mp, map[string]string{"temp": "2"})
+	}
+
+	req := testStruct{"Hello", 3306}
+	// Pass the struct as Json
+	// The struct can also be a pointer.
+	resp2 := Delete[BasicPostResponse](delURL, req)
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp2.Data), data)
+
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
+
+func TestDeleteOpts(t *testing.T) {
+	req := testStruct{"Hello", 3306}
+	// DeleteOpts can support more features
+	resp := Delete[BasicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	if resp.URL != stringPlus(delURL, "?temp=2") {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(delURL, "?temp=2"))
+	}
+	data := &testStruct{}
+	json.Unmarshal([]byte(resp.Data), data)
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Data got %v but want %v", data, req)
+	}
+}
+
+type FormStruct struct {
+	Name    string   `json:"name"`
+	Version string   `json:"version"`
+	Numbers []string `json:"numbers"`
+}
+
+func TestFormData(t *testing.T) {
+	// The Form only support string and []string
+	req := FormStruct{"Hello", "3306", []string{"1", "2", "3"}}
+	resp := Post[BasicPostResponse](postURL, NewOption(WithForm(req)))
+	data := &FormStruct{}
+	bts, _ := json.Marshal(resp.Form)
+	json.Unmarshal(bts, data)
+
+	if !reflect.DeepEqual(*data, req) {
+		t.Errorf("resp.Form got %v but want %v", data, req)
+	}
+
+	req2 := map[string]any{"name": "Hello", "numbers": []any{"1", "2", "3"}}
+	resp2 := Post[BasicPostResponse](postURL, NewOption(WithForm(req2)))
+	data2 := map[string]any{}
+	bts, _ = json.Marshal(resp2.Form)
+	json.Unmarshal(bts, &data2)
+
+	if !reflect.DeepEqual(data2, req2) {
+		t.Errorf("resp.Form got %v but want %v", data2, req2)
+	}
+}
+
+func TestForceHeaders(t *testing.T) {
+	headers := map[string][]string{"Content-Type": {"123"}, "Test-Header": {"1", "2", "3"}}
+	resp := Get[BasicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
+
+	if resp.Headers.ContentType != "123" {
+		t.Errorf("Content-Type got %v but want %v", resp.Headers.ContentType, "123")
+	}
+	if resp.Headers.TestHeader != "1,2,3" {
+		t.Errorf("Content-Type got %v but want %v", resp.Headers.TestHeader, "1,2,3")
+	}
+}
+
+func TestCookies(t *testing.T) {
+	cookies := []*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}, {Name: "Test", Value: "12345"}}
+	resp := Get[BasicGetResponse](getURL, NewOption(WithCookies(cookies)))
+
+	if resp.Headers.Cookie != "Test=123; Test2=321; Test=12345" {
+		t.Errorf("Cookies got %v but want %v", resp.Headers.Cookie, "Test=123; Test2=321; Test=12345")
+	}
+}
+
+func TestTimeout(t *testing.T) {
+	timeout := 1 * time.Millisecond
+	resp := Get[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+
+	if resp != nil {
+		t.Error("resp should be nil")
+	}
+
+	timeout = 1 * time.Minute
+	resp = Get[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+
+	if resp == nil {
+		t.Fatal("resp got nil")
+	}
+	if resp.URL != getURL {
+		t.Errorf("url got %v but want %v", resp.URL, getURL)
 	}
 }
