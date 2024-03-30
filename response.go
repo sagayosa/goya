@@ -20,6 +20,9 @@ type Response struct {
 // Bytes will read the body and return the result in []byte
 // and the RawResponse will be closed
 func (r *Response) Bytes() ([]byte, error) {
+	if r.Body != nil {
+		return r.Body, nil
+	}
 	if r.RawResponse == nil {
 		return nil, fmt.Errorf("RawResponse is nil")
 	}
@@ -35,11 +38,12 @@ func (r *Response) Bytes() ([]byte, error) {
 // String will read the body and return the result in string
 // and the RawResponse will be closed
 func (r *Response) String() (string, error) {
-	if r.Body == nil {
-		_, err := r.Bytes()
-		if err != nil {
-			return "", err
-		}
+	if r.Body != nil {
+		return string(r.Body), nil
+	}
+	_, err := r.Bytes()
+	if err != nil {
+		return "", err
 	}
 	return string(r.Body), nil
 }
