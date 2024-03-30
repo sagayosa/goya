@@ -204,3 +204,28 @@ func TestWithCookies(t *testing.T) {
 		}
 	}
 }
+
+func TestWithForceHeader(t *testing.T) {
+	ts := []struct {
+		url    string
+		header string
+		value  string
+	}{
+		{
+			"http://127.0.0.1:3306",
+			"T", "R",
+		},
+	}
+	for _, tt := range ts {
+		b := NewRequestBuilder("GET", tt.url, NewOption(WithForceHeader(tt.header, tt.value)))
+		r := b.Build()
+
+		rv, ok := r.Header[http.CanonicalHeaderKey(tt.header)]
+		if !ok {
+			t.Errorf("header %v not set", tt.header)
+		}
+		if !reflect.DeepEqual(tt.value, rv[0]) {
+			t.Errorf("header %v got %v but want %v", tt.header, rv[0], tt.value)
+		}
+	}
+}

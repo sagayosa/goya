@@ -145,3 +145,12 @@ func WithTimeout(timeout time.Duration) OptionFunc {
 		}
 	}
 }
+
+// WithForceHeader will set the header to *http.Request
+func WithForceHeader(header string, value string) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+		return func(b *RequestBuider) {}, func(req *http.Request) {
+			req.Header.Set(header, value)
+		}, func(client *http.Client) {}
+	}
+}
