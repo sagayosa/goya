@@ -73,7 +73,7 @@ func TestDo(t *testing.T) {
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Do got StatusCode %v but want %v", resp.StatusCode, http.StatusOK)
 		}
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.RawResponse.Body)
 		basic := &BasicGetResponse{}
 		json.Unmarshal(body, basic)
 

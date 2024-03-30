@@ -49,7 +49,7 @@ func (c *RequestClient) BuildClient() *http.Client {
 	return c.Client
 }
 
-func (c *RequestClient) Do() *http.Response {
+func (c *RequestClient) Do() *Response {
 	if c.Request == nil {
 		c.BuildRequest()
 	}
@@ -60,7 +60,7 @@ func (c *RequestClient) Do() *http.Response {
 	if err != nil {
 		c.ErrHappen(err)
 	}
-	return resp
+	return NewResponse(resp)
 }
 
 // Return all errors that occurred during the Do()

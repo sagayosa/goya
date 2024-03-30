@@ -15,6 +15,7 @@ type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc)
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
 type ClientBuildFunc func(client *http.Client)
+type ClientDoneFunc func(client *RequestClient)
 
 // WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
 // data can be struct or map
