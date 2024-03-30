@@ -40,8 +40,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetOpts(t *testing.T) {
-	// GetOpts can support more features
-	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithParams(map[string]string{"temp": "2"})))
+	resp := Get[BasicGetResponse](getURL, NewOption(WithParams(map[string]string{"temp": "2"})))
 	if resp.URL != stringPlus(getURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(getURL, "?temp=2"))
 	}
@@ -75,8 +74,7 @@ func TestPost(t *testing.T) {
 
 func TestPostOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
-	// PostOpts can support more features
-	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := Post[BasicPostResponse](postURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(postURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(postURL, "?temp=2"))
 	}
@@ -115,8 +113,7 @@ func TestPut(t *testing.T) {
 
 func TestPutOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
-	// PutOpts can support more features
-	resp := PutOpts[BasicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := Put[BasicPostResponse](putURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(putURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(putURL, "?temp=2"))
 	}
@@ -156,7 +153,7 @@ func TestDel(t *testing.T) {
 func TestDeleteOpts(t *testing.T) {
 	req := testStruct{"Hello", 3306}
 	// DeleteOpts can support more features
-	resp := DeleteOpts[BasicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
+	resp := Delete[BasicPostResponse](delURL, NewOption(WithParams(map[string]string{"temp": "2"}), WithJson(req)))
 	if resp.URL != stringPlus(delURL, "?temp=2") {
 		t.Errorf("resp.URL got %v but want %v", resp.URL, stringPlus(delURL, "?temp=2"))
 	}
@@ -176,7 +173,7 @@ type FormStruct struct {
 func TestFormData(t *testing.T) {
 	// The Form only support string and []string
 	req := FormStruct{"Hello", "3306", []string{"1", "2", "3"}}
-	resp := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req)))
+	resp := Post[BasicPostResponse](postURL, NewOption(WithForm(req)))
 	data := &FormStruct{}
 	bts, _ := json.Marshal(resp.Form)
 	json.Unmarshal(bts, data)
@@ -186,7 +183,7 @@ func TestFormData(t *testing.T) {
 	}
 
 	req2 := map[string]any{"name": "Hello", "numbers": []any{"1", "2", "3"}}
-	resp2 := PostOpts[BasicPostResponse](postURL, NewOption(WithForm(req2)))
+	resp2 := Post[BasicPostResponse](postURL, NewOption(WithForm(req2)))
 	data2 := map[string]any{}
 	bts, _ = json.Marshal(resp2.Form)
 	json.Unmarshal(bts, &data2)
@@ -198,7 +195,7 @@ func TestFormData(t *testing.T) {
 
 func TestForceHeaders(t *testing.T) {
 	headers := map[string][]string{"Content-Type": {"123"}, "Test-Header": {"1", "2", "3"}}
-	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
+	resp := Get[BasicGetResponse](getURL, NewOption(WithForceHeaders(headers)))
 
 	if resp.Headers.ContentType != "123" {
 		t.Errorf("Content-Type got %v but want %v", resp.Headers.ContentType, "123")
@@ -210,7 +207,7 @@ func TestForceHeaders(t *testing.T) {
 
 func TestCookies(t *testing.T) {
 	cookies := []*http.Cookie{{Name: "Test", Value: "123"}, {Name: "Test2", Value: "321"}, {Name: "Test", Value: "12345"}}
-	resp := GetOpts[BasicGetResponse](getURL, NewOption(WithCookies(cookies)))
+	resp := Get[BasicGetResponse](getURL, NewOption(WithCookies(cookies)))
 
 	if resp.Headers.Cookie != "Test=123; Test2=321; Test=12345" {
 		t.Errorf("Cookies got %v but want %v", resp.Headers.Cookie, "Test=123; Test2=321; Test=12345")
@@ -219,14 +216,14 @@ func TestCookies(t *testing.T) {
 
 func TestTimeout(t *testing.T) {
 	timeout := 1 * time.Millisecond
-	resp := GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+	resp := Get[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
 
 	if resp != nil {
 		t.Error("resp should be nil")
 	}
 
 	timeout = 1 * time.Minute
-	resp = GetOpts[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
+	resp = Get[*BasicGetResponse](getURL, NewOption(WithTimeout(timeout)))
 
 	if resp == nil {
 		t.Fatal("resp got nil")
