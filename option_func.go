@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc)
+type OptionFunc func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc)
 type BeforeBuildFunc func(b *RequestBuider)
 type AfterBuildFunc func(req *http.Request)
 type ClientBuildFunc func(client *http.Client)
@@ -20,9 +20,9 @@ type ClientDoneFunc func(client *RequestClient)
 // WithJson will inject data into the body of the request in JSON format and set the Content-Type to application/json
 // data can be struct or map
 func WithJson(data any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithJson data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithJson data is nil")) }, nil, nil, nil
 		}
 		return func(b *RequestBuider) {
 				bts, err := json.Marshal(data)
@@ -32,7 +32,7 @@ func WithJson(data any) OptionFunc {
 				b.Body = bts
 			}, func(req *http.Request) {
 				req.Header.Set(contentType, contentTypeJSON)
-			}, func(client *http.Client) {}
+			}, nil, nil
 	}
 }
 
@@ -40,9 +40,9 @@ func WithJson(data any) OptionFunc {
 // data can be struct or map but the form data only support string and []string as values
 // Therefore, if the value is not the string or []string, it will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithForm(data any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
 		if data == nil {
-			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithForm data is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithForm data is nil")) }, nil, nil, nil
 		}
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
@@ -74,7 +74,7 @@ func WithForm(data any) OptionFunc {
 				b.Body = body.Bytes()
 			}, func(req *http.Request) {
 				req.Header.Set(contentType, writer.FormDataContentType())
-			}, func(client *http.Client) {}
+			}, nil, nil
 	}
 }
 
@@ -82,9 +82,9 @@ func WithForm(data any) OptionFunc {
 // data can be struct or map
 // but the value will be changed to string by fmt.Sprintf() (may be JSON is better?)
 func WithParams(params any) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
 		if params == nil {
-			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithParams params is nil")) }, func(req *http.Request) {}, func(client *http.Client) {}
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithParams params is nil")) }, nil, nil, nil
 		}
 		return func(b *RequestBuider) {
 			mp, err := convertToMapStringAny(params)
@@ -106,14 +106,14 @@ func WithParams(params any) OptionFunc {
 
 			parsedURL.RawQuery = querys.Encode()
 			b.URL = parsedURL.String()
-		}, func(req *http.Request) {}, func(client *http.Client) {}
+		}, nil, nil, nil
 	}
 }
 
 // WithForceHeaders will inject all key value pairs from the headers into the *http.Request's Header
 func WithForceHeaders(headers http.Header) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
-		return func(b *RequestBuider) {}, func(req *http.Request) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		return nil, func(req *http.Request) {
 			for k, v := range headers {
 				for i, h := range v {
 					if i == 0 {
@@ -123,35 +123,35 @@ func WithForceHeaders(headers http.Header) OptionFunc {
 					req.Header.Add(k, h)
 				}
 			}
-		}, func(client *http.Client) {}
+		}, nil, nil
 	}
 }
 
 // WithCookies will inject all cookies into the *http.Request's Cookie
 func WithCookies(cookies []*http.Cookie) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
-		return func(b *RequestBuider) {}, func(req *http.Request) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		return nil, func(req *http.Request) {
 			for _, c := range cookies {
 				req.AddCookie(c)
 			}
-		}, func(client *http.Client) {}
+		}, nil, nil
 	}
 }
 
 // WithTimeout will set timeout to *http.Client.Timeout
 func WithTimeout(timeout time.Duration) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
-		return func(b *RequestBuider) {}, func(req *http.Request) {}, func(client *http.Client) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		return nil, nil, func(client *http.Client) {
 			client.Timeout = timeout
-		}
+		}, nil
 	}
 }
 
 // WithForceHeader will set the header to *http.Request
 func WithForceHeader(header string, value string) OptionFunc {
-	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc) {
-		return func(b *RequestBuider) {}, func(req *http.Request) {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		return nil, func(req *http.Request) {
 			req.Header.Set(header, value)
-		}, func(client *http.Client) {}
+		}, nil, nil
 	}
 }
