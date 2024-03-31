@@ -244,3 +244,17 @@ func TestWithErrors(t *testing.T) {
 		t.Error("errs got nil")
 	}
 }
+
+func TestWithPathParams(t *testing.T) {
+	resp := Get[BasicGetResponse]("http://httpbin.org/:way", NewOption(WithPathParams(map[string]any{"way": "get"})))
+	if resp.URL != getURL {
+		t.Errorf("resp.URL got %v but want %v", resp.URL, getURL)
+	}
+
+	resp2 := Post[BasicPostResponse]("http://httpbin.org/:way", NewOption(WithPathParams(struct {
+		Way string `json:"way"`
+	}{"post"})))
+	if resp2.URL != postURL {
+		t.Errorf("resp2.URL got %v but want %v", resp2.URL, postURL)
+	}
+}

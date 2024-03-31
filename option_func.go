@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -105,6 +106,40 @@ func WithParams(params any) OptionFunc {
 			}
 
 			parsedURL.RawQuery = querys.Encode()
+			b.URL = parsedURL.String()
+		}, nil, nil, nil
+	}
+}
+
+func WithPathParams(params any) OptionFunc {
+	return func() (BeforeBuildFunc, AfterBuildFunc, ClientBuildFunc, ClientDoneFunc) {
+		if params == nil {
+			return func(b *RequestBuider) { b.ErrHappen(fmt.Errorf("WithPathParams params is nil")) }, nil, nil, nil
+		}
+		return func(b *RequestBuider) {
+			mp, err := convertToMapStringAny(params)
+			if err != nil {
+				b.ErrHappen(err)
+				return
+			}
+			parsedURL, err := url.Parse(b.URL)
+			if err != nil {
+				b.ErrHappen(fmt.Errorf("URL is invalid : %w", err))
+				return
+			}
+			segs := strings.Split(parsedURL.Path, "/")
+
+			for i, seg := range segs {
+				if strings.HasPrefix(seg, ":") {
+					key := seg[1:]
+					val, ok := mp[key]
+					if ok {
+						segs[i] = fmt.Sprintf("%v", val)
+					}
+				}
+			}
+			parsedURL.Path = strings.Join(segs, "/")
+
 			b.URL = parsedURL.String()
 		}, nil, nil, nil
 	}
